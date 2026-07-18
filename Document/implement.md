@@ -49,9 +49,9 @@ This section implements data structures on Firestore to ensure efficient real-ti
 - [x] Create mock data in `products` collection for Café DoiTung.
 
 ### Phase 2: LINE API & Webhook Configuration
-- [ ] Register LINE OA & create Provider/Channel in LINE Developers.
-- [ ] Setup Webhook URL via Node.js/Firebase Functions to receive LINE events.
-- [ ] Implement `Auto response` logic for basic fallback keywords (e.g., "ติดต่อพนักงาน").
+- [x] Register LINE OA & create Provider/Channel in LINE Developers.
+- [x] Setup Webhook URL via Node.js/Firebase Functions to receive LINE events.
+- [x] Implement `Auto response` logic for basic fallback keywords (e.g., "ติดต่อพนักงาน").
 
 ### Phase 3: LIFF App Development (Frontend)
 - [ ] Register LIFF URL in LINE Developers.

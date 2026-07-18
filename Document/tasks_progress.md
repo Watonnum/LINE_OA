@@ -5,10 +5,10 @@
 ---
 
 ## 📊 สรุปความคืบหน้าภาพรวม (Overall Progress)
-* **สถานะปัจจุบัน:** Phase 1 เสร็จสมบูรณ์แล้ว
+* **สถานะปัจจุบัน:** Phase 1 และ Phase 2 เสร็จสมบูรณ์แล้ว
 * **จำนวน Phase ทั้งหมด:** 5 Phases
-* **Phase ที่เหลือ:** 4 Phases (Phase 2 - 5)
-* **เปอร์เซ็นต์ความคืบหน้า:** 20% (1/5 Phases)
+* **Phase ที่เหลือ:** 3 Phases (Phase 3 - 5)
+* **เปอร์เซ็นต์ความคืบหน้า:** 40% (2/5 Phases)
 
 ---
 
@@ -22,11 +22,11 @@
 
 ---
 
-### ⏳ Phase 2: LINE API & Webhook Configuration (งานถัดไป)
+### ✅ Phase 2: LINE API & Webhook Configuration (เสร็จสิ้น)
 **เป้าหมาย:** เชื่อมต่อแอปพลิเคชันกับระบบ LINE OA และสร้างระบบตอบกลับอัตโนมัติเบื้องต้น (Backend/Webhook)
-* [ ] **Register LINE OA:** สมัครและสร้าง Channel บน [LINE Developers Console](https://developers.line.biz/)
-* [ ] **Setup Webhook URL:** ตั้งค่าระบบ Webhook (ด้วย Node.js/Express หรือ Firebase Cloud Functions) เพื่อคอยรับ Events ต่างๆ ส่งมาจาก LINE
-* [ ] **Implement Auto response:** ทำระบบตอบกลับอัตโนมัติพื้นฐานสำหรับคำสำคัญ เช่น ข้อความตอบกลับเมื่อพิมพ์คำว่า "ติดต่อพนักงาน"
+* [x] **Register LINE OA:** สมัครและสร้าง Channel บน [LINE Developers Console](https://developers.line.biz/) (เสร็จแล้ว)
+* [x] **Setup Webhook URL:** ตั้งค่าระบบ Webhook (ด้วย Node.js/Express หรือ Firebase Cloud Functions) เพื่อคอยรับ Events ต่างๆ ส่งมาจาก LINE (เชื่อมต่อผ่าน ngrok ไปที่ Next.js API Route `/api/webhook` สำเร็จ)
+* [x] **Implement Auto response:** ทำระบบตอบกลับอัตโนมัติพื้นฐานสำหรับคำสำคัญ เช่น ข้อความตอบกลับเมื่อพิมพ์คำว่า "ติดต่อพนักงาน" (รหัสผ่าน Next.js API Route พร้อมใช้งานแล้ว)
 
 ---
 
