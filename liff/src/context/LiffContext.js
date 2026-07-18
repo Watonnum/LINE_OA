@@ -22,6 +22,34 @@ export const LiffProvider = ({ children }) => {
     let isMounted = true;
 
     const initLiff = async () => {
+      // Check for dev/mock mode parameter in URL
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isMockMode = urlParams.get("mock") === "true" || urlParams.get("dev") === "true";
+
+        if (isMockMode) {
+          console.log("Forcing Mock Developer Mode via URL parameter");
+          const mockProfile = {
+            displayName: "Dev Customer (Mock)",
+            userId: "dev_mock_user_999",
+            pictureUrl: "",
+          };
+          window.__liffObject = {
+            isLoggedIn: () => true,
+            getProfile: async () => mockProfile,
+            login: () => console.log("Mock login called"),
+          };
+          window.__liffProfile = mockProfile;
+          
+          if (isMounted) {
+            setLiffObject(window.__liffObject);
+            setUserProfile(mockProfile);
+            setIsLoading(false);
+          }
+          return;
+        }
+      }
+
       try {
         const liffModule = await import("@line/liff");
         const liff = liffModule.default;
