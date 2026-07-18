@@ -146,6 +146,14 @@ export const LiffProvider = ({ children }) => {
               createdAt: serverTimestamp(),
             });
             addStep("New user profile registered successfully.");
+          } else if (userSnap.data().rewardPoints === undefined) {
+            addStep("User profile exists but rewardPoints is missing. Initializing welcome bonus (+100 pts)...");
+            await setDoc(userRef, {
+              rewardPoints: 100,
+              membershipTier: userSnap.data().membershipTier || "Bronze",
+              totalSpent: userSnap.data().totalSpent || 0,
+            }, { merge: true });
+            addStep("Existing user welcome points initialized successfully.");
           } else {
             addStep("User record found in database.");
           }

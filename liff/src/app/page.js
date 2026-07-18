@@ -147,7 +147,14 @@ export default function Home() {
             </div>
           )}
           <div className="ml-3">
-            <h4 className="text-xs text-white/70">ยินดีต้อนรับ</h4>
+            <div className="flex items-center gap-1.5">
+              <h4 className="text-xs text-white/70">ยินดีต้อนรับ</h4>
+              {userDbProfile?.membershipTier && (
+                <span className="px-1.5 py-0.5 bg-doitung-gold/20 border border-doitung-gold/30 text-[8px] font-extrabold rounded text-doitung-gold uppercase tracking-wider scale-90 origin-left">
+                  {userDbProfile.membershipTier}
+                </span>
+              )}
+            </div>
             <h2 className="font-bold text-sm leading-tight text-white line-clamp-1">{userProfile?.displayName || "LINE Customer"}</h2>
           </div>
         </div>
