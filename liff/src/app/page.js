@@ -9,7 +9,7 @@ import CartTab from "@/components/CartTab";
 import OrdersTab from "@/components/OrdersTab";
 
 export default function Home() {
-  const { userProfile, isLoading: isLiffLoading, error: liffError } = useLiff();
+  const { userProfile, isLoading: isLiffLoading, error: liffError, steps: liffSteps } = useLiff();
   const [activeTab, setActiveTab] = useState("menu"); // menu, cart, orders
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
@@ -94,9 +94,21 @@ export default function Home() {
   // Loading Screens
   if (isLiffLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF8F5]">
-        <div className="w-12 h-12 border-4 border-doitung-green border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF8F5] p-6 text-center">
+        <div className="w-12 h-12 border-4 border-[#2A4B35] border-t-transparent rounded-full animate-spin" />
         <h2 className="text-[#2A4B35] font-semibold text-base mt-4 font-sans">กำลังเตรียมข้อมูลร้านอาหาร...</h2>
+        
+        {/* Debug Console Logs */}
+        <div className="mt-8 p-3 bg-stone-100 rounded-xl w-full max-w-xs text-left font-mono text-[9px] text-stone-600 max-h-40 overflow-y-auto border border-stone-200 shadow-inner">
+          <div className="font-bold border-b border-stone-200 pb-1 mb-1 text-stone-700 text-[10px]">Debug Console Logs:</div>
+          {liffSteps && liffSteps.length > 0 ? (
+            liffSteps.map((step, idx) => (
+              <div key={idx} className="truncate">{step}</div>
+            ))
+          ) : (
+            <div className="italic text-stone-400">Waiting for logs...</div>
+          )}
+        </div>
       </div>
     );
   }

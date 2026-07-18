@@ -7,16 +7,42 @@ const LiffContext = createContext({
   userProfile: null,
   isLoading: true,
   error: null,
+  steps: [],
 });
 
 const timeout = (ms, message) => 
   new Promise((_, reject) => setTimeout(() => reject(new Error(message || "Timeout")), ms));
+
+// Singletons to share across multiple useEffect invocations (React 18/19 Strict Mode)
+let liffInitPromise = null;
+let liffProfilePromise = null;
+let globalSteps = [];
+let stepListeners = [];
+
+const addGlobalStep = (msg) => {
+  const time = new Date().toLocaleTimeString();
+  const step = `${time}: ${msg}`;
+  console.log("[LIFF-INIT]", step);
+  globalSteps.push(step);
+  stepListeners.forEach(listener => listener([...globalSteps]));
+};
 
 export const LiffProvider = ({ children }) => {
   const [liffObject, setLiffObject] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [steps, setSteps] = useState(() => [...globalSteps]);
+
+  useEffect(() => {
+    // Register listener for step changes
+    const listener = (newSteps) => setSteps(newSteps);
+    stepListeners.push(listener);
+
+    return () => {
+      stepListeners = stepListeners.filter(l => l !== listener);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,7 +54,7 @@ export const LiffProvider = ({ children }) => {
         const isMockMode = urlParams.get("mock") === "true" || urlParams.get("dev") === "true";
 
         if (isMockMode) {
-          console.log("Forcing Mock Developer Mode via URL parameter");
+          addGlobalStep("Mock Mode detected in URL query params.");
           const mockProfile = {
             displayName: "Dev Customer (Mock)",
             userId: "dev_mock_user_999",
@@ -46,118 +72,93 @@ export const LiffProvider = ({ children }) => {
             setUserProfile(mockProfile);
             setIsLoading(false);
           }
+          addGlobalStep("Mock Mode setup complete, loader removed.");
           return;
         }
       }
 
       try {
-        const liffModule = await import("@line/liff");
-        const liff = liffModule.default;
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
-
         if (!liffId) {
           throw new Error("NEXT_PUBLIC_LIFF_ID is not configured in .env.local.");
         }
 
-        // Prevent double initialization in React Strict Mode (dev)
-        if (window.__liffObject) {
-          console.log("LIFF already initialized (cached)");
-          if (isMounted) {
-            setLiffObject(window.__liffObject);
-            if (window.__liffProfile) {
-              setUserProfile(window.__liffProfile);
-            }
-            setIsLoading(false);
-          }
-          return;
-        }
-
-        if (window.__liffInitializing) {
-          console.log("LIFF is already initializing, waiting...");
-          const checkInit = setInterval(() => {
-            if (window.__liffObject) {
-              clearInterval(checkInit);
-              if (isMounted) {
-                setLiffObject(window.__liffObject);
-                if (window.__liffProfile) {
-                  setUserProfile(window.__liffProfile);
-                }
-                setIsLoading(false);
-              }
-            }
-          }, 100);
-          return;
-        }
-
-        window.__liffInitializing = true;
-        console.log("Initializing LIFF with ID:", liffId);
-
-        // Run liff.init with a 6-second timeout to prevent indefinite hangs
-        await Promise.race([
-          liff.init({ liffId }),
-          timeout(6000, "LIFF init timed out")
-        ]);
-        
-        console.log("LIFF initialized successfully");
-        window.__liffObject = liff;
-
-        // Handle Login Flow
-        if (!liff.isLoggedIn()) {
-          console.log("User is not logged in. Redirecting to LINE login...");
-          liff.login();
-        } else {
-          console.log("User is logged in. Fetching user profile...");
-          try {
-            // Run liff.getProfile with a 4-second timeout
-            const profile = await Promise.race([
-              liff.getProfile(),
-              timeout(4000, "LIFF getProfile timed out")
+        // Initialize LIFF (singleton promise to avoid concurrent inits)
+        if (!liffInitPromise) {
+          addGlobalStep("Importing @line/liff dynamic module...");
+          liffInitPromise = (async () => {
+            const liffModule = await import("@line/liff");
+            const liff = liffModule.default;
+            addGlobalStep(`Initializing liff.init({ liffId: "${liffId}" })...`);
+            
+            await Promise.race([
+              liff.init({ liffId }),
+              timeout(8000, "LIFF init timed out (8s)")
             ]);
-            console.log("User profile fetched:", profile);
-            window.__liffProfile = profile;
-            if (isMounted) {
-              setUserProfile(profile);
-            }
-          } catch (profileErr) {
-            console.warn("Failed to fetch user profile, using mock fallback profile:", profileErr.message);
-            const fallbackProfile = {
-              displayName: "LINE User (Profile Fallback)",
-              userId: "fallback_user_id_" + Math.random().toString(36).substring(7),
-              pictureUrl: "",
-            };
-            window.__liffProfile = fallbackProfile;
-            if (isMounted) {
-              setUserProfile(fallbackProfile);
-            }
-          }
+            return liff;
+          })();
         }
 
-        window.__liffInitializing = false;
+        const liff = await liffInitPromise;
+        addGlobalStep("liff.init() resolved successfully.");
+
         if (isMounted) {
           setLiffObject(liff);
+        }
+
+        // Check Login Status
+        addGlobalStep("Checking liff.isLoggedIn()...");
+        const loggedIn = liff.isLoggedIn();
+        addGlobalStep(`liff.isLoggedIn() returned: ${loggedIn}`);
+
+        if (!loggedIn) {
+          addGlobalStep("User is not logged in. Calling liff.login()...");
+          liff.login();
+          // Stop execution since the browser is redirecting
+          return;
+        }
+
+        // Fetch User Profile
+        addGlobalStep("User is logged in. Fetching user profile...");
+        if (!liffProfilePromise) {
+          liffProfilePromise = (async () => {
+            addGlobalStep("Calling liff.getProfile()...");
+            const profile = await Promise.race([
+              liff.getProfile(),
+              timeout(6000, "LIFF getProfile timed out (6s)")
+            ]);
+            return profile;
+          })();
+        }
+
+        const profile = await liffProfilePromise;
+        addGlobalStep(`Profile fetched successfully: ${profile.displayName} (${profile.userId})`);
+
+        if (isMounted) {
+          setUserProfile(profile);
           setIsLoading(false);
+          addGlobalStep("State updated, loader removed successfully.");
         }
       } catch (err) {
-        console.warn("LIFF SDK failed to load. Falling back to Mock Developer Mode:", err.message);
-        window.__liffInitializing = false;
+        addGlobalStep(`Error occurred during initialization: ${err.message}`);
         
-        // In local development, fallback to mock mode to keep the developer productive
+        // Local dev fallback to Mock Mode if initialization fails or times out
+        addGlobalStep("Falling back to Mock Developer Mode to prevent blocking...");
         if (isMounted) {
           const mockProfile = {
-            displayName: "Dev Customer (Mock)",
+            displayName: "Dev Customer (Mock Fallback)",
             userId: "dev_mock_user_999",
             pictureUrl: "",
           };
-          window.__liffObject = {
+          const mockLiff = {
             isLoggedIn: () => true,
             getProfile: async () => mockProfile,
             login: () => console.log("Mock login called"),
           };
-          window.__liffProfile = mockProfile;
-          
-          setLiffObject(window.__liffObject);
+          setLiffObject(mockLiff);
           setUserProfile(mockProfile);
           setIsLoading(false);
+          addGlobalStep("Fallback profile applied, loader removed.");
         }
       }
     };
@@ -176,6 +177,7 @@ export const LiffProvider = ({ children }) => {
         userProfile,
         isLoading,
         error,
+        steps,
       }}
     >
       {children}
