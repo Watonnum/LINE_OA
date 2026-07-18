@@ -15,8 +15,7 @@ export default function OrdersTab({ userProfile }) {
     const ordersCollection = collection(db, "orders");
     const ordersQuery = query(
       ordersCollection,
-      where("userId", "==", userProfile.userId),
-      orderBy("orderedAt", "desc")
+      where("userId", "==", userProfile.userId)
     );
 
     const unsubscribe = onSnapshot(ordersQuery, (querySnapshot) => {
@@ -27,6 +26,14 @@ export default function OrdersTab({ userProfile }) {
           ...doc.data(),
         });
       });
+      
+      // Sort client-side by orderedAt timestamp (descending)
+      ordersList.sort((a, b) => {
+        const timeA = a.orderedAt?.seconds || 0;
+        const timeB = b.orderedAt?.seconds || 0;
+        return timeB - timeA;
+      });
+
       console.log("Fetched orders:", ordersList);
       setOrders(ordersList);
       setIsLoading(false);
