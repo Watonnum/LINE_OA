@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const LiffContext = createContext({
   liff: null,
@@ -125,6 +127,31 @@ export const LiffProvider = ({ children }) => {
 
         const profile = await liffProfilePromise;
         addStep(`Profile fetched successfully: ${profile.displayName} (${profile.userId})`);
+
+        // Check if user exists in Firestore, if not register with welcome bonus
+        try {
+          addStep("Checking database user record...");
+          const userRef = doc(db, "users", profile.userId);
+          const userSnap = await getDoc(userRef);
+
+          if (!userSnap.exists()) {
+            addStep("New user profile. Registering and applying welcome bonus (+100 pts)...");
+            await setDoc(userRef, {
+              userId: profile.userId,
+              displayName: profile.displayName || "LINE User",
+              pictureUrl: profile.pictureUrl || "",
+              rewardPoints: 100, // Welcome points
+              totalSpent: 0,
+              membershipTier: "Bronze",
+              createdAt: serverTimestamp(),
+            });
+            addStep("New user profile registered successfully.");
+          } else {
+            addStep("User record found in database.");
+          }
+        } catch (dbErr) {
+          addStep(`Warning during user record check: ${dbErr.message}`);
+        }
 
         if (isMounted) {
           setUserProfile(profile);

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp, increment } from "firebase/firestore";
 
 export default function CartTab({ cart, onUpdateQuantity, onClearCart, userProfile, onOrderSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,6 +38,29 @@ export default function CartTab({ cart, onUpdateQuantity, onClearCart, userProfi
         quantity: item.quantity,
       }));
 
+      // Calculate Points & Tiers
+      const earnedPoints = Math.floor(totalAmount / 10);
+      const userRef = doc(db, "users", userProfile.userId);
+
+      // Fetch current spending to determine new membership tier
+      let currentSpent = 0;
+      try {
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          currentSpent = userSnap.data().totalSpent || 0;
+        }
+      } catch (dbErr) {
+        console.warn("Failed to fetch user spend for tier check:", dbErr);
+      }
+
+      const newTotalSpent = currentSpent + totalAmount;
+      let newTier = "Bronze";
+      if (newTotalSpent >= 3000) {
+        newTier = "Gold";
+      } else if (newTotalSpent >= 1000) {
+        newTier = "Silver";
+      }
+
       // Create Order Document in Firestore
       const orderData = {
         orderNumber,
@@ -46,20 +69,28 @@ export default function CartTab({ cart, onUpdateQuantity, onClearCart, userProfi
         pictureUrl: userProfile.pictureUrl || "",
         items,
         totalAmount,
+        earnedPoints,
         notes,
         status: "Pending", // Pending, Preparing, Completed
+        paymentMethod: "PromptPay",
+        paymentStatus: "Paid",
+        statusHistory: [
+          { status: "Pending", updatedAt: new Date() }
+        ],
         orderedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
       console.log("Submitting order to Firestore:", orderData);
       const orderRef = await addDoc(collection(db, "orders"), orderData);
 
-      // Create or update user profile document in Firestore, add reward points (e.g., 10 points per 100 THB spent)
-      const earnedPoints = Math.floor(totalAmount / 10);
-      const userRef = doc(db, "users", userProfile.userId);
+      // Update user profile document in Firestore: increment points and spending
       await setDoc(userRef, {
         displayName: userProfile.displayName || "LINE User",
         pictureUrl: userProfile.pictureUrl || "",
+        rewardPoints: increment(earnedPoints),
+        totalSpent: increment(totalAmount),
+        membershipTier: newTier,
         lastOrderedAt: serverTimestamp(),
       }, { merge: true });
 

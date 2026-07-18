@@ -50,8 +50,8 @@ export default function Home() {
       if (docSnap.exists()) {
         setUserDbProfile(docSnap.data());
       } else {
-        // Fallback default points for new user
-        setUserDbProfile({ rewardPoints: 120 });
+        // Fallback default points for new user if document not created yet
+        setUserDbProfile({ rewardPoints: 0 });
       }
     }, (err) => {
       console.error("Failed to listen to user profile changes:", err);
@@ -156,7 +156,7 @@ export default function Home() {
         <div className="bg-[#1A2E21] px-3 py-1.5 rounded-full flex items-center border border-white/10 shadow-inner">
           <span className="text-doitung-gold text-sm mr-1">⭐</span>
           <span className="text-xs font-bold text-white">
-            {userDbProfile?.rewardPoints ?? 120} <span className="text-[10px] font-normal text-white/60">แต้ม</span>
+            {userDbProfile?.rewardPoints ?? 0} <span className="text-[10px] font-normal text-white/60">แต้ม</span>
           </span>
         </div>
       </header>
