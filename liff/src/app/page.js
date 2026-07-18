@@ -9,7 +9,12 @@ import CartTab from "@/components/CartTab";
 import OrdersTab from "@/components/OrdersTab";
 
 export default function Home() {
-  const { userProfile, isLoading: isLiffLoading, error: liffError, steps: liffSteps } = useLiff();
+  const {
+    userProfile,
+    isLoading: isLiffLoading,
+    error: liffError,
+    steps: liffSteps,
+  } = useLiff();
   const [activeTab, setActiveTab] = useState("menu"); // menu, cart, orders
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("ทั้งหมด");
@@ -46,39 +51,53 @@ export default function Home() {
     if (!userProfile?.userId) return;
 
     const userRef = doc(db, "users", userProfile.userId);
-    const unsubscribe = onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setUserDbProfile(docSnap.data());
-      } else {
-        // Fallback default points for new user if document not created yet
-        setUserDbProfile({ rewardPoints: 0 });
-      }
-    }, (err) => {
-      console.error("Failed to listen to user profile changes:", err);
-    });
+    const unsubscribe = onSnapshot(
+      userRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setUserDbProfile(docSnap.data());
+        } else {
+          // Fallback default points for new user if document not created yet
+          setUserDbProfile({ rewardPoints: 0 });
+        }
+      },
+      (err) => {
+        console.error("Failed to listen to user profile changes:", err);
+      },
+    );
 
     return () => unsubscribe();
   }, [userProfile]);
 
   // 3. Filter products by category during render
-  const filteredProducts = selectedCategory === "ทั้งหมด"
-    ? products
-    : products.filter((p) => p.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === "ทั้งหมด"
+      ? products
+      : products.filter((p) => p.category === selectedCategory);
 
   // 4. Cart logic
   const handleAddToCart = (product, change) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => (item.product.id || item.product.name) === (product.id || product.name));
-      
+      const existingItem = prevCart.find(
+        (item) =>
+          (item.product.id || item.product.name) ===
+          (product.id || product.name),
+      );
+
       if (existingItem) {
         const newQuantity = existingItem.quantity + change;
         if (newQuantity <= 0) {
-          return prevCart.filter((item) => (item.product.id || item.product.name) !== (product.id || product.name));
+          return prevCart.filter(
+            (item) =>
+              (item.product.id || item.product.name) !==
+              (product.id || product.name),
+          );
         }
         return prevCart.map((item) =>
-          (item.product.id || item.product.name) === (product.id || product.name)
+          (item.product.id || item.product.name) ===
+          (product.id || product.name)
             ? { ...item, quantity: newQuantity }
-            : item
+            : item,
         );
       } else if (change > 0) {
         return [...prevCart, { product, quantity: 1 }];
@@ -96,14 +115,20 @@ export default function Home() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF8F5] p-6 text-center">
         <div className="w-12 h-12 border-4 border-[#2A4B35] border-t-transparent rounded-full animate-spin" />
-        <h2 className="text-[#2A4B35] font-semibold text-base mt-4 font-sans">กำลังเตรียมข้อมูลร้านอาหาร...</h2>
-        
+        <h2 className="text-[#2A4B35] font-semibold text-base mt-4 font-sans">
+          กำลังเตรียมข้อมูลร้านอาหาร...
+        </h2>
+
         {/* Debug Console Logs */}
         <div className="mt-8 p-3 bg-stone-100 rounded-xl w-full max-w-xs text-left font-mono text-[9px] text-stone-600 max-h-40 overflow-y-auto border border-stone-200 shadow-inner">
-          <div className="font-bold border-b border-stone-200 pb-1 mb-1 text-stone-700 text-[10px]">Debug Console Logs:</div>
+          <div className="font-bold border-b border-stone-200 pb-1 mb-1 text-stone-700 text-[10px]">
+            Debug Console Logs:
+          </div>
           {liffSteps && liffSteps.length > 0 ? (
             liffSteps.map((step, idx) => (
-              <div key={idx} className="truncate">{step}</div>
+              <div key={idx} className="truncate">
+                {step}
+              </div>
             ))
           ) : (
             <div className="italic text-stone-400">Waiting for logs...</div>
@@ -117,7 +142,9 @@ export default function Home() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAF8F5] p-6 text-center">
         <div className="text-5xl mb-4">⚠️</div>
-        <h2 className="text-red-700 font-semibold text-lg font-sans">เกิดข้อผิดพลาดในการโหลดระบบ</h2>
+        <h2 className="text-red-700 font-semibold text-lg font-sans">
+          เกิดข้อผิดพลาดในการโหลดระบบ
+        </h2>
         <p className="text-sm text-stone-500 mt-2 max-w-sm">{liffError}</p>
         <button
           onClick={() => window.location.reload()}
@@ -131,7 +158,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen max-w-md mx-auto bg-[#FAF8F5] shadow-lg relative pb-16 font-sans">
-      
       {/* 1. Header component */}
       <header className="sticky top-0 z-50 bg-[#2A4B35] text-white p-4 rounded-b-[2rem] shadow-md flex items-center justify-between">
         <div className="flex items-center">
@@ -155,7 +181,9 @@ export default function Home() {
                 </span>
               )}
             </div>
-            <h2 className="font-bold text-sm leading-tight text-white line-clamp-1">{userProfile?.displayName || "LINE Customer"}</h2>
+            <h2 className="font-bold text-sm leading-tight text-white line-clamp-1">
+              {userProfile?.displayName || "LINE Customer"}
+            </h2>
           </div>
         </div>
 
@@ -163,7 +191,8 @@ export default function Home() {
         <div className="bg-[#1A2E21] px-3 py-1.5 rounded-full flex items-center border border-white/10 shadow-inner">
           <span className="text-doitung-gold text-sm mr-1">⭐</span>
           <span className="text-xs font-bold text-white">
-            {userDbProfile?.rewardPoints ?? 0} <span className="text-[10px] font-normal text-white/60">แต้ม</span>
+            {userDbProfile?.rewardPoints ?? 0}{" "}
+            <span className="text-[10px] font-normal text-white/60">แต้ม</span>
           </span>
         </div>
       </header>
@@ -174,21 +203,31 @@ export default function Home() {
           <div className="w-24 h-24 bg-[#E8F5E9] rounded-full flex items-center justify-center text-5xl mb-6 shadow-inner animate-bounce">
             🎉
           </div>
-          <h2 className="text-[#2A4B35] font-bold text-2xl">สั่งอาหารสำเร็จแล้ว!</h2>
-          <p className="text-sm text-stone-500 mt-2">ขอบคุณที่ร่วมสนับสนุนกาแฟและผลิตภัณฑ์จากดอยตุงครับ</p>
-          
+          <h2 className="text-[#2A4B35] font-bold text-2xl">
+            สั่งอาหารสำเร็จแล้ว!
+          </h2>
+          <p className="text-sm text-stone-500 mt-2">
+            ขอบคุณที่ร่วมสนับสนุนกาแฟและผลิตภัณฑ์จากดอยตุงครับ
+          </p>
+
           <div className="bg-white rounded-2xl p-5 border border-stone-100 shadow-sm w-full my-6 max-w-xs text-left">
             <div className="flex justify-between text-xs text-stone-400 mb-2">
               <span>หมายเลขออเดอร์</span>
-              <span className="font-bold text-stone-800">{successOrder.orderNumber}</span>
+              <span className="font-bold text-stone-800">
+                {successOrder.orderNumber}
+              </span>
             </div>
             <div className="flex justify-between text-xs text-stone-400 mb-2">
               <span>ราคาสุทธิ</span>
-              <span className="font-bold text-doitung-green">{successOrder.totalAmount} THB</span>
+              <span className="font-bold text-doitung-green">
+                {successOrder.totalAmount} THB
+              </span>
             </div>
             <div className="flex justify-between text-xs text-stone-400">
               <span>แต้มที่ได้รับเพิ่ม</span>
-              <span className="font-bold text-doitung-gold">+{successOrder.earnedPoints} แต้ม</span>
+              <span className="font-bold text-doitung-gold">
+                +{successOrder.earnedPoints} แต้ม
+              </span>
             </div>
           </div>
 
@@ -216,14 +255,6 @@ export default function Home() {
       <main className="flex-1 overflow-y-auto">
         {activeTab === "menu" && (
           <div className="p-4 flex flex-col gap-4">
-            
-            {/* Promo Banner */}
-            <div className="relative h-28 w-full bg-[#5D4037] rounded-3xl overflow-hidden p-5 flex flex-col justify-center text-white shadow-sm border border-[#3E2723]/10">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-doitung-gold">โปรโมชั่นพิเศษ</span>
-              <h3 className="font-bold text-base mt-1">DoiTung Macadamia Latte</h3>
-              <p className="text-xs text-white/80 mt-1">ลิ้มรสกาแฟซิกเนเจอร์ ผสานถั่วแมคคาเดเมียหอมมัน</p>
-            </div>
-
             {/* Category Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               {["ทั้งหมด", "Coffee", "Non-Coffee", "Bakery"].map((cat) => (
@@ -245,7 +276,9 @@ export default function Home() {
             {isProductsLoading ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="w-8 h-8 border-2 border-doitung-green border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs text-stone-400 mt-2">กำลังโหลดรายการอาหาร...</span>
+                <span className="text-xs text-stone-400 mt-2">
+                  กำลังโหลดรายการอาหาร...
+                </span>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20 text-stone-400 text-sm">
@@ -254,7 +287,10 @@ export default function Home() {
             ) : (
               <div className="flex flex-col gap-3">
                 {filteredProducts.map((product) => {
-                  const cartItem = cart.find((item) => (item.product.id || item.product.name) === product.id);
+                  const cartItem = cart.find(
+                    (item) =>
+                      (item.product.id || item.product.name) === product.id,
+                  );
                   return (
                     <ProductCard
                       key={product.id}
@@ -279,9 +315,7 @@ export default function Home() {
           />
         )}
 
-        {activeTab === "orders" && (
-          <OrdersTab userProfile={userProfile} />
-        )}
+        {activeTab === "orders" && <OrdersTab userProfile={userProfile} />}
       </main>
 
       {/* 4. Bottom Tab Bar Navigation */}
@@ -289,7 +323,9 @@ export default function Home() {
         <button
           onClick={() => setActiveTab("menu")}
           className={`flex flex-col items-center flex-1 cursor-pointer transition-colors ${
-            activeTab === "menu" ? "text-doitung-green" : "text-stone-400 hover:text-stone-600"
+            activeTab === "menu"
+              ? "text-doitung-green"
+              : "text-stone-400 hover:text-stone-600"
           }`}
         >
           <span className="text-xl">☕</span>
@@ -299,7 +335,9 @@ export default function Home() {
         <button
           onClick={() => setActiveTab("cart")}
           className={`flex flex-col items-center flex-1 relative cursor-pointer transition-colors ${
-            activeTab === "cart" ? "text-doitung-green" : "text-stone-400 hover:text-stone-600"
+            activeTab === "cart"
+              ? "text-doitung-green"
+              : "text-stone-400 hover:text-stone-600"
           }`}
         >
           <span className="text-xl">🛒</span>
@@ -314,7 +352,9 @@ export default function Home() {
         <button
           onClick={() => setActiveTab("orders")}
           className={`flex flex-col items-center flex-1 cursor-pointer transition-colors ${
-            activeTab === "orders" ? "text-doitung-green" : "text-stone-400 hover:text-stone-600"
+            activeTab === "orders"
+              ? "text-doitung-green"
+              : "text-stone-400 hover:text-stone-600"
           }`}
         >
           <span className="text-xl">📋</span>
