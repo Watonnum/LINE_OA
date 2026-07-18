@@ -5,10 +5,10 @@
 ---
 
 ## 📊 สรุปความคืบหน้าภาพรวม (Overall Progress)
-* **สถานะปัจจุบัน:** Phase 1 และ Phase 2 เสร็จสมบูรณ์แล้ว
+* **สถานะปัจจุบัน:** Phase 1, Phase 2 และ Phase 3 เสร็จสมบูรณ์แล้ว
 * **จำนวน Phase ทั้งหมด:** 5 Phases
-* **Phase ที่เหลือ:** 3 Phases (Phase 3 - 5)
-* **เปอร์เซ็นต์ความคืบหน้า:** 40% (2/5 Phases)
+* **Phase ที่เหลือ:** 2 Phases (Phase 4 - 5)
+* **เปอร์เซ็นต์ความคืบหน้า:** 60% (3/5 Phases)
 
 ---
 
@@ -30,15 +30,15 @@
 
 ---
 
-### ⏳ Phase 3: LIFF App Development (Frontend)
+### ✅ Phase 3: LIFF App Development (Frontend) (เสร็จสิ้น)
 **เป้าหมาย:** พัฒนาระบบสั่งอาหาร (Self-Ordering) ด้วยเทคโนโลยี LIFF ที่จะเปิดขึ้นมาใน LINE
-* [ ] **Register LIFF URL:** ลงทะเบียน LIFF App ใน LINE Developers Console
-* [ ] **LIFF Authentication:** พัฒนาฟังก์ชัน `liff.init()` และ `liff.getProfile()` ในระบบ Next.js เพื่อระบุตัวตนผู้ใช้ LINE
-* [ ] **Develop UI & Pages:**
+* [x] **Register LIFF URL:** ลงทะเบียน LIFF App ใน LINE Developers Console (ลงทะเบียนด้วย LIFF ID: `2010753790-4gunPEkN` เรียบร้อย)
+* [x] **LIFF Authentication:** พัฒนาฟังก์ชัน `liff.init()` และ `liff.getProfile()` ในระบบ Next.js เพื่อระบุตัวตนผู้ใช้ LINE
+* [x] **Develop UI & Pages:**
   * หน้าหลักแสดงรายการสินค้า (Product Listing) พร้อมปุ่มเลือกใส่ตะกร้า
   * หน้าตะกร้าสินค้า (Cart) สำหรับทบทวนรายการและยอดเงิน
-  * หน้าชำระเงิน/ส่งคำสั่งซื้อ (Checkout)
-* [ ] **Brand Identity Design:** ออกแบบหน้าตาให้สวยงาม พรีเมียม ใช้โทนสีอบอุ่น (Earth Tones) และรูปแบบฟอนต์ที่ตรงตาม CI ของแบรนด์ DoiTung
+  * หน้าชำระเงิน/ส่งคำสั่งซื้อ (Checkout) (บันทึกข้อมูลคำสั่งซื้อลง Firestore และสะสมคะแนนแต้มผู้ใช้จริง)
+* [x] **Brand Identity Design:** ออกแบบหน้าตาให้สวยงาม พรีเมียม ใช้โทนสีอบอุ่น (Earth Tones) และรูปแบบฟอนต์ที่ตรงตาม CI ของแบรนด์ DoiTung (ใช้ฟอนต์ Prompt/Inter และสไตล์เขียวป่า/น้ำตาลกาแฟดอยตุง)
 
 ---
 

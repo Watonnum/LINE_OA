@@ -54,10 +54,10 @@ This section implements data structures on Firestore to ensure efficient real-ti
 - [x] Implement `Auto response` logic for basic fallback keywords (e.g., "ติดต่อพนักงาน").
 
 ### Phase 3: LIFF App Development (Frontend)
-- [ ] Register LIFF URL in LINE Developers.
-- [ ] Implement `liff.init()` and `liff.getProfile()` to authenticate users.
-- [ ] Create UI: Product Listing, Cart, and Checkout pages.
-- [ ] Ensure UI design uses appropriate colors (earth tones) and font sizes for DoiTung brand, fulfilling the evaluation criteria for design suitability[cite: 1].
+- [x] Register LIFF URL in LINE Developers.
+- [x] Implement `liff.init()` and `liff.getProfile()` to authenticate users.
+- [x] Create UI: Product Listing, Cart, and Checkout pages.
+- [x] Ensure UI design uses appropriate colors (earth tones) and font sizes for DoiTung brand, fulfilling the evaluation criteria for design suitability[cite: 1].
 
 ### Phase 4: AI Integration & Workflow (n8n + Dialogflow)
 - [ ] Setup Dialogflow agent with intents: `Menu Recommendation`, `Store Hours`.
