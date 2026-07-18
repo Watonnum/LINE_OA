@@ -28,11 +28,17 @@ export const LiffProvider = ({ children }) => {
     const time = new Date().toLocaleTimeString();
     const stepLine = `${time}: ${msg}`;
     console.log("[LIFF-INIT]", stepLine);
-    setSteps((prev) => [...prev, stepLine]);
+    setTimeout(() => {
+      setSteps((prev) => [...prev, stepLine]);
+    }, 0);
   };
 
+  console.log("LiffProvider rendered. isLoading:", isLoading, "steps count:", steps.length);
+
   useEffect(() => {
+    console.log("LiffProvider useEffect triggered!");
     let isMounted = true;
+    addStep("useEffect mounted. Starting initialization...");
 
     const initLiff = async () => {
       // Check for dev/mock mode parameter in URL
