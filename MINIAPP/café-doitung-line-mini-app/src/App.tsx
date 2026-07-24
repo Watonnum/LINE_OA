@@ -17,7 +17,8 @@ import { FeaturedCarousel } from './components/FeaturedCarousel';
 import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, OrderResponse } from './api/orderService';
-import { syncUserProfile } from './services/userService';
+import { syncUserProfile, processReferral } from './services/userService';
+
 import { fetchProducts, fetchBranches } from './services/productService';
 
 export default function App() {
@@ -120,14 +121,24 @@ export default function App() {
     loadInitialData();
   }, []);
 
-  // Sync user profile to Firestore when user logs in
+  // Sync user profile to Firestore when user logs in & process referral if arriving via invite link
   useEffect(() => {
     if (lineProfile) {
       syncUserProfile(lineProfile).then((pts) => {
         if (pts !== undefined) setUserBeans(pts);
       });
+
+      // Check if friend arrived via referral link (?ref=USER_ID)
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const referrerId = urlParams.get('ref');
+        if (referrerId && referrerId !== lineProfile.userId) {
+          processReferral(referrerId, lineProfile);
+        }
+      }
     }
   }, [lineProfile]);
+
 
 
   const handleLineLogin = () => {
@@ -178,8 +189,10 @@ export default function App() {
 
   // Invite Friends handler using LINE Share Target Picker Flex Message
   const handleInviteFriends = async () => {
-    const liffId = (import.meta as any).env?.VITE_LIFF_ID || '1657000000-xxxxxx';
-    const liffUrl = `https://liff.line.me/${liffId}`;
+    const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '2010828712-odH8ncn8';
+    const refParam = lineProfile?.userId ? `?ref=${lineProfile.userId}` : '';
+    const liffUrl = `https://liff.line.me/${liffId}${refParam}`;
+
 
     if (isLiffInitialized && liff.isApiAvailable('shareTargetPicker')) {
       try {

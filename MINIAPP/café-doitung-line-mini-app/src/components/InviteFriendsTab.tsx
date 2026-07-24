@@ -42,12 +42,14 @@ export const InviteFriendsTab: React.FC<InviteFriendsTabProps> = ({
   }, [userProfile]);
 
   const handleCopyLink = () => {
-    const liffId = process.env.NEXT_PUBLIC_LIFF_ID || (import.meta as any).env?.VITE_LIFF_ID || '';
-    const link = liffId ? `https://liff.line.me/${liffId}` : window.location.href;
+    const liffId = process.env.NEXT_PUBLIC_LIFF_ID || '2010828712-odH8ncn8';
+    const refParam = userProfile?.userId ? `?ref=${userProfile.userId}` : '';
+    const link = `https://liff.line.me/${liffId}${refParam}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
 
   const handleSendInvite = () => {
     if (onInvite) {
