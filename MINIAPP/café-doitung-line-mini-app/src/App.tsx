@@ -17,7 +17,8 @@ import { BaristaQueueView } from './components/BaristaQueueView';
 import { FeaturedCarousel } from './components/FeaturedCarousel';
 import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
-import { createOrder, fetchOrderById, OrderResponse } from './api/orderService';
+import { createOrder, fetchOrderById, fetchOrders, OrderResponse } from './api/orderService';
+
 import { syncUserProfile, processReferral, fetchUserCoupons } from './services/userService';
 import { fetchProducts } from './services/productService';
 import { RedeemModal } from './components/RedeemModal';
@@ -282,6 +283,39 @@ export default function App() {
   // Order submission & confirmation modal state
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [confirmedOrder, setConfirmedOrder] = useState<OrderResponse | null>(null);
+  const [ordersHistory, setOrdersHistory] = useState<OrderResponse[]>([]);
+
+  // Load orders history from localStorage and API
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('cafe_doitung_orders');
+        if (saved) {
+          setOrdersHistory(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.error('Failed to parse saved orders:', err);
+      }
+    }
+
+    fetchOrders().then((list) => {
+      if (list && list.length > 0) {
+        setOrdersHistory((prev) => {
+          const merged = [...prev];
+          for (const item of list) {
+            if (!merged.some((o) => o.orderId === item.orderId)) {
+              merged.push(item);
+            }
+          }
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cafe_doitung_orders', JSON.stringify(merged));
+          }
+          return merged;
+        });
+      }
+    });
+  }, []);
+
 
   // Filtered menu items
   const filteredMenuItems = productsList.filter((item) => {
@@ -342,8 +376,16 @@ export default function App() {
 
       const resultOrder = await createOrder(orderPayload);
       setConfirmedOrder(resultOrder);
+      setOrdersHistory((prev) => {
+        const updated = [resultOrder, ...prev.filter((o) => o.orderId !== resultOrder.orderId)];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cafe_doitung_orders', JSON.stringify(updated));
+        }
+        return updated;
+      });
       setCartItems([]);
       setIsCartOpen(false);
+
       setUserBeans((prev) => prev + 20); // Earn 20 beans per pre-order
     } catch (error: any) {
       console.error('Submission failed:', error);
@@ -466,39 +508,54 @@ export default function App() {
           )}
 
           {activeTab === 'orders' && (
-
             <div className="px-4 py-3 space-y-4 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-black text-white">Your Orders (ประวัติคำสั่งซื้อ)</h2>
-                <span className="text-xs text-[#06C755] bg-[#132218] px-2.5 py-1 rounded-full border border-[#1E3A24]">
-                  Pickup Orders
+                <span className="text-xs text-[#06C755] bg-[#132218] px-2.5 py-1 rounded-full border border-[#1E3A24] font-bold">
+                  {ordersHistory.length} Orders
                 </span>
               </div>
 
-              {confirmedOrder ? (
-                <div className="p-4 bg-[#132218] rounded-2xl border border-[#06C755]/50 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">Order ID</span>
-                      <p className="text-xl font-black font-mono text-amber-400">#{confirmedOrder.orderId}</p>
+              {ordersHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {ordersHistory.map((ord) => (
+                    <div
+                      key={ord.orderId}
+                      className="p-4 bg-[#132218] rounded-2xl border border-[#1E3A24] space-y-3 transition hover:border-emerald-800"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
+                            Order ID
+                          </span>
+                          <p className="text-lg font-black font-mono text-[#C5A059]">{ord.orderId}</p>
+                        </div>
+                        <span className="px-2.5 py-1 bg-emerald-950 text-[#06C755] border border-emerald-700/50 text-[11px] font-bold rounded-full">
+                          {ord.status ? ord.status.replace(/_/g, ' ') : 'Received'}
+                        </span>
+                      </div>
+
+                      <div className="text-xs text-stone-300 space-y-1">
+                        <p className="text-stone-400">
+                          <strong>รายการสินค้า:</strong>{' '}
+                          {ord.items ? ord.items.map((i) => `${i.itemName} x${i.quantity}`).join(', ') : 'Specialty Coffee'}
+                        </p>
+                        <p>
+                          <strong>เวลานัดรับ:</strong> {ord.pickupTime}
+                        </p>
+                        <p className="text-amber-400 font-bold text-sm">
+                          <strong>ยอดรวม:</strong> ฿{ord.totalAmount.toLocaleString()}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => setConfirmedOrder(ord)}
+                        className="w-full py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-stone-950 font-black text-xs rounded-xl shadow-md transition"
+                      >
+                        แสดงตั๋วรับสินค้า (Show Pick-up Ticket)
+                      </button>
                     </div>
-                    <span className="px-3 py-1 bg-[#06C755] text-stone-950 text-xs font-black rounded-full">
-                      {confirmedOrder.status.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-stone-300 space-y-1">
-                    <p><strong>Store:</strong> {confirmedOrder.branch}</p>
-                    <p><strong>Pickup:</strong> {confirmedOrder.pickupTime}</p>
-                    <p><strong>Total:</strong> ฿{confirmedOrder.totalAmount.toLocaleString()}</p>
-                  </div>
-
-                  <button
-                    onClick={() => setConfirmedOrder(confirmedOrder)}
-                    className="w-full py-2 bg-[#06C755] text-stone-950 font-black text-xs rounded-xl hover:bg-[#05b34c]"
-                  >
-                    Show Pick-up Ticket (แสดงตั๋วรับสินค้า)
-                  </button>
+                  ))}
                 </div>
               ) : (
                 <div className="p-8 text-center bg-[#132218] rounded-2xl border border-dashed border-[#1E3A24] space-y-3">
@@ -514,6 +571,7 @@ export default function App() {
               )}
             </div>
           )}
+
         </main>
       )}
 
