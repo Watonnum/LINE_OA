@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Users, Share2, Copy, Check, Sparkles, UserCheck } from 'lucide-react';
+import { Users, Share2, Copy, Check, Sparkles, UserCheck, UserPlus } from 'lucide-react';
 import { InvitedFriend, LineUserProfile } from '../types';
 import { fetchUserReferrals } from '../services/userService';
 
@@ -25,48 +25,21 @@ export const InviteFriendsTab: React.FC<InviteFriendsTabProps> = ({
   onInvite
 }) => {
   const [copied, setCopied] = useState(false);
-  const [realFriends, setRealFriends] = useState<InvitedFriend[]>([]);
-
-  // Default fallback list
-  const defaultFriendsList: InvitedFriend[] = [
-    {
-      id: 'f1',
-      name: 'Niran (นิรันดร์)',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-      joinedDate: '2 hours ago',
-      pointsEarned: 1,
-      status: 'Active'
-    },
-    {
-      id: 'f2',
-      name: 'Ploy (พลอย)',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-      joinedDate: 'Yesterday',
-      pointsEarned: 1,
-      status: 'Joined'
-    },
-    {
-      id: 'f3',
-      name: 'Korn (กร)',
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80',
-      joinedDate: '3 days ago',
-      pointsEarned: 1,
-      status: 'Active'
-    }
-  ];
+  const [friendsList, setFriendsList] = useState<InvitedFriend[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (userProfile?.userId) {
-      fetchUserReferrals(userProfile.userId).then((list) => {
-        if (list && list.length > 0) {
-          setRealFriends(list);
-        }
-      });
+      setIsLoading(true);
+      fetchUserReferrals(userProfile.userId)
+        .then((list) => {
+          setFriendsList(list || []);
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      setFriendsList([]);
     }
   }, [userProfile]);
-
-  const friendsList = realFriends.length > 0 ? realFriends : defaultFriendsList;
-
 
   const handleCopyLink = () => {
     const liffId = process.env.NEXT_PUBLIC_LIFF_ID || (import.meta as any).env?.VITE_LIFF_ID || '';
@@ -86,7 +59,7 @@ export const InviteFriendsTab: React.FC<InviteFriendsTabProps> = ({
     }
   };
 
-  const totalPoints = friendsList.reduce((sum, f) => sum + f.pointsEarned, 0);
+  const totalPoints = friendsList.reduce((sum, f) => sum + (f.pointsEarned || 1), 0);
 
   return (
     <div className="px-4 py-3 space-y-4 max-w-md mx-auto text-white">
@@ -121,7 +94,7 @@ export const InviteFriendsTab: React.FC<InviteFriendsTabProps> = ({
           </div>
 
           <div className="text-right bg-stone-950/80 px-3 py-1.5 rounded-xl border border-stone-800">
-            <span className="text-[10px] text-stone-400 block font-medium">แต้มสะสม</span>
+            <span className="text-[10px] text-stone-400 block font-medium">แต้มจากเพื่อน</span>
             <span className="text-lg font-black text-[#06C755]">+{totalPoints} แต้ม</span>
           </div>
         </div>
@@ -162,38 +135,56 @@ export const InviteFriendsTab: React.FC<InviteFriendsTabProps> = ({
           <span className="text-[#06C755] font-semibold">รวม +{totalPoints} แต้ม</span>
         </div>
 
-        <div className="space-y-2">
-          {friendsList.map((friend) => (
-            <div
-              key={friend.id}
-              className="p-3 bg-[#132218] rounded-xl border border-[#1E3A24] flex items-center justify-between"
-            >
-              <div className="flex items-center space-x-3">
-                <img
-                  src={friend.avatar}
-                  alt={friend.name}
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-full object-cover border border-[#06C755]/50"
-                />
-                <div>
-                  <h4 className="text-xs font-bold text-white leading-tight">
-                    {friend.name}
-                  </h4>
-                  <span className="text-[10px] text-stone-400 font-medium">
-                    {friend.joinedDate}
+        {isLoading ? (
+          <div className="p-6 text-center text-xs text-stone-400 bg-[#132218] rounded-xl border border-[#1E3A24]">
+            กำลังโหลดข้อมูลเพื่อน...
+          </div>
+        ) : friendsList.length === 0 ? (
+          /* Empty State when 0 friends invited */
+          <div className="p-8 text-center bg-[#132218] rounded-2xl border border-[#1E3A24] space-y-2">
+            <div className="w-12 h-12 rounded-full bg-stone-800/80 border border-stone-700 flex items-center justify-center mx-auto text-stone-400">
+              <UserPlus className="w-6 h-6 text-[#06C755]" />
+            </div>
+            <h4 className="text-sm font-bold text-stone-200">ยังไม่มีเพื่อนที่กดเข้าร่วม</h4>
+            <p className="text-xs text-stone-400 max-w-xs mx-auto leading-relaxed">
+              คุณยังไม่ได้เชิญใคร หรือยังไม่มีเพื่อนกดเข้าใช้งานผ่านลิงก์ของคุณ <br />
+              กดปุ่ม <strong className="text-[#06C755]">"ส่งลิงก์เชิญ (LINE)"</strong> เพื่อเริ่มชวนเพื่อนคนแรกได้เลย!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {friendsList.map((friend) => (
+              <div
+                key={friend.id}
+                className="p-3 bg-[#132218] rounded-xl border border-[#1E3A24] flex items-center justify-between"
+              >
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={friend.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80'}
+                    alt={friend.name}
+                    referrerPolicy="no-referrer"
+                    className="w-9 h-9 rounded-full object-cover border border-[#06C755]/50"
+                  />
+                  <div>
+                    <h4 className="text-xs font-bold text-white leading-tight">
+                      {friend.name}
+                    </h4>
+                    <span className="text-[10px] text-stone-400 font-medium">
+                      {friend.joinedDate}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-[#06C755] border border-emerald-800 text-[11px] font-black flex items-center space-x-1">
+                    <UserCheck className="w-3 h-3" />
+                    <span>+1 แต้ม</span>
                   </span>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-[#06C755] border border-emerald-800 text-[11px] font-black flex items-center space-x-1">
-                  <UserCheck className="w-3 h-3" />
-                  <span>+1 แต้ม</span>
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
