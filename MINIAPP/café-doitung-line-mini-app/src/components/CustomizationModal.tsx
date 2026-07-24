@@ -95,8 +95,9 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in">
-      <div className="w-full max-w-md bg-[#0F1812] text-stone-100 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-[#1E3A24] max-h-[90vh] flex flex-col animate-in slide-in-from-bottom duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in">
+      <div className="w-full max-w-md bg-[#0F1812] text-stone-100 rounded-3xl shadow-2xl overflow-hidden border border-[#1E3A24] max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+
         
         {/* Header Image */}
         <div className="relative h-44 sm:h-48 w-full bg-stone-900 overflow-hidden flex-shrink-0">
