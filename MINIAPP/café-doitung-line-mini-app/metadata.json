@@ -1,0 +1,6 @@
+{
+  "name": "Café DoiTung LINE Mini App",
+  "description": "Mobile-first LINE Mini App for Café DoiTung Pre-Order & Pickup specialty coffee experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
