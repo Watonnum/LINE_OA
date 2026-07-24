@@ -307,14 +307,35 @@ export default function App() {
               merged.push(item);
             }
           }
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('cafe_doitung_orders', JSON.stringify(merged));
-          }
           return merged;
         });
       }
     });
   }, []);
+
+
+  const isAnyModalOpen = Boolean(selectedItemForCustom || isCartOpen || isRedeemModalOpen || confirmedOrder);
+
+  // Lock background body scroll when any modal/drawer is active
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (isAnyModalOpen) {
+        document.body.style.overflow = 'hidden';
+        document.body.style.touchAction = 'none';
+      } else {
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+      }
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+      }
+    };
+  }, [isAnyModalOpen]);
+
 
 
   // Filtered menu items
