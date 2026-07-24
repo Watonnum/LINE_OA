@@ -6,8 +6,8 @@ import liff from '@line/liff';
 import { MenuItem, CategoryType, CartItem, Branch, LineUserProfile, MiniAppTab } from './types';
 import { BRANCHES, MENU_ITEMS } from './data/menuData';
 import { LineHeader } from './components/LineHeader';
-import { LineProfileCard } from './components/LineProfileCard';
 import { MenuCategories } from './components/MenuCategories';
+
 import { MenuItemCard } from './components/MenuItemCard';
 import { CustomizationModal } from './components/CustomizationModal';
 import { CartDrawer } from './components/CartDrawer';
@@ -363,35 +363,22 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0A110C] text-stone-100 font-sans antialiased pb-28">
 
-      {/* LINE Mini App Top Header & Branch Selector */}
+      {/* LINE Mini App Top Header */}
       <LineHeader
-        selectedBranch={selectedBranch}
-        onSelectBranch={setSelectedBranch}
-        activeView={activeView}
-        onToggleView={setActiveView}
-        activeOrderCount={confirmedOrder ? 1 : 0}
-        onInviteFriends={handleInviteFriends}
+        isLoggedIn={isLoggedIn}
+        profile={lineProfile}
+        userBeans={userBeans}
+        isAuthChecking={isAuthChecking}
+        isLoggingIn={isLoggingIn}
+        onLogin={handleLineLogin}
+        onLogout={handleLineLogout}
       />
-
 
       {activeView === 'barista' ? (
         <BaristaQueueView />
       ) : (
-        <main className="max-w-md mx-auto space-y-4">
-          {/* LINE Authentication & Profile Section */}
-          <LineProfileCard
-            isLiffInitialized={isLiffInitialized}
-            isLoggedIn={isLoggedIn}
-            isInClient={isInClient}
-            profile={lineProfile}
-            liffError={liffError}
-            isSharePickerAvailable={isSharePickerAvailable}
-            isAuthChecking={isAuthChecking}
-            isLoggingIn={isLoggingIn}
-            onLogin={handleLineLogin}
-            onLogout={handleLineLogout}
-            onInviteFriends={handleInviteFriends}
-          />
+        <main className="max-w-md mx-auto space-y-4 pt-2">
+
 
 
           {/* Render Views based on activeTab */}
