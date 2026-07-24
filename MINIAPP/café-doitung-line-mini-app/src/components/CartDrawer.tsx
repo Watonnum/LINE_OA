@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Clock, User, Phone, MessageSquare, ShoppingBag, Leaf, ChevronRight, Loader2, AlertCircle, Sparkles, LogIn, Gift, Tag } from 'lucide-react';
-import { CartItem, Branch, LineUserProfile, UserCoupon } from '../types';
+import { CartItem, LineUserProfile, UserCoupon } from '../types';
 import { PICKUP_TIMES } from '../data/menuData';
 
 interface CartDrawerProps {
@@ -11,7 +11,6 @@ interface CartDrawerProps {
   cartItems: CartItem[];
   onRemoveItem: (cartItemId: string) => void;
   onClearCart: () => void;
-  selectedBranch: Branch;
   isLoggedIn: boolean;
   onLogin: () => void;
   lineUserProfile?: LineUserProfile | null;
@@ -37,7 +36,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   cartItems,
   onRemoveItem,
   onClearCart,
-  selectedBranch,
   isLoggedIn,
   onLogin,
   lineUserProfile,
@@ -49,6 +47,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onSubmitOrder,
   isSubmitting
 }) => {
+
   if (!isOpen) return null;
 
   const [pickupTimeOption, setPickupTimeOption] = useState<string>('ASAP (10-15 mins)');
@@ -126,8 +125,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             <div>
               <h2 className="text-base font-extrabold text-white">Your Shopping Cart</h2>
               <p className="text-[11px] text-emerald-200/80">
-                {cartItems.length} items • Pickup at {selectedBranch.name}
+                {cartItems.length} items • Pickup at Café DoiTung
               </p>
+
             </div>
           </div>
 

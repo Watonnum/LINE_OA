@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Leaf, Coffee, ChevronRight, CheckCircle2, Clock, Sparkles } from 'lucide-react';
 import liff from '@line/liff';
-import { MenuItem, CategoryType, CartItem, Branch, LineUserProfile, MiniAppTab } from './types';
-import { BRANCHES, MENU_ITEMS } from './data/menuData';
+import { MenuItem, CategoryType, CartItem, LineUserProfile, MiniAppTab } from './types';
+import { MENU_ITEMS } from './data/menuData';
+
 import { LineHeader } from './components/LineHeader';
 import { MenuCategories } from './components/MenuCategories';
 
@@ -18,16 +19,14 @@ import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, OrderResponse } from './api/orderService';
 import { syncUserProfile, processReferral, fetchUserCoupons } from './services/userService';
-import { fetchProducts, fetchBranches } from './services/productService';
+import { fetchProducts } from './services/productService';
 import { RedeemModal } from './components/RedeemModal';
 import { UserCoupon } from './types';
 
 
 
 export default function App() {
-  const [branchesList, setBranchesList] = useState<Branch[]>(BRANCHES);
   const [productsList, setProductsList] = useState<MenuItem[]>(MENU_ITEMS);
-  const [selectedBranch, setSelectedBranch] = useState<Branch>(BRANCHES[0]);
   const [activeCategory, setActiveCategory] = useState<CategoryType>('all');
   const [activeView, setActiveView] = useState<'customer' | 'barista'>('customer');
 
@@ -114,15 +113,12 @@ export default function App() {
   // Fetch real data from Firebase/Services
   useEffect(() => {
     async function loadInitialData() {
-      const [prods, brs] = await Promise.all([fetchProducts(), fetchBranches()]);
+      const prods = await fetchProducts();
       if (prods && prods.length > 0) setProductsList(prods);
-      if (brs && brs.length > 0) {
-        setBranchesList(brs);
-        setSelectedBranch(brs[0]);
-      }
     }
     loadInitialData();
   }, []);
+
 
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
   const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
@@ -325,7 +321,8 @@ export default function App() {
     try {
       const orderPayload = {
         lineUserId: lineProfile?.userId,
-        branch: selectedBranch.name,
+        branch: 'Café DoiTung',
+
         items: cartItems.map((ci) => ({
           itemName: ci.menuItem.name,
           temp: ci.customization.temp,
@@ -579,8 +576,8 @@ export default function App() {
         cartItems={cartItems}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
-        selectedBranch={selectedBranch}
         isLoggedIn={isLoggedIn}
+
         onLogin={handleLineLogin}
         lineUserProfile={lineProfile}
         userBeans={userBeans}

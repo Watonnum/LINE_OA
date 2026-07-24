@@ -154,8 +154,9 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
                   <span>สาขาที่มารับ (Pickup Store)</span>
                 </div>
                 <div className="font-bold text-stone-100 truncate mt-0.5 text-xs">
-                  {order.branch}
+                  {order.branch || 'Café DoiTung'}
                 </div>
+
               </div>
 
               <div className="bg-[#0A140D]/90 p-2.5 rounded-xl border border-[#1E3A24]">

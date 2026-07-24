@@ -1,7 +1,7 @@
 import { db, isFirebaseConfigured } from '../lib/firebase';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
-import { MenuItem, Branch } from '../types';
-import { MENU_ITEMS, BRANCHES } from '../data/menuData';
+import { MenuItem } from '../types';
+import { MENU_ITEMS } from '../data/menuData';
 
 /**
  * Fetch products from Firestore 'products' collection.
@@ -33,33 +33,6 @@ export async function fetchProducts(): Promise<MenuItem[]> {
 }
 
 /**
- * Fetch branches from Firestore 'branches' collection.
- * If empty, automatically seeds Firestore 'branches' collection.
- */
-export async function fetchBranches(): Promise<Branch[]> {
-  if (isFirebaseConfigured() && db) {
-    try {
-      const branchesRef = collection(db, 'branches');
-      const snap = await getDocs(branchesRef);
-      if (!snap.empty) {
-        const list: Branch[] = [];
-        snap.forEach((docSnap) => {
-          list.push({ id: docSnap.id, ...docSnap.data() } as Branch);
-        });
-        return list;
-      } else {
-        await seedProductsToFirestore();
-        return BRANCHES;
-      }
-    } catch (error) {
-      console.error('Firestore fetchBranches error:', error);
-    }
-  }
-
-  return BRANCHES;
-}
-
-/**
  * Seed initial products to Firestore database
  */
 export async function seedProductsToFirestore(): Promise<boolean> {
@@ -68,10 +41,7 @@ export async function seedProductsToFirestore(): Promise<boolean> {
     for (const item of MENU_ITEMS) {
       await setDoc(doc(db, 'products', item.id), item, { merge: true });
     }
-    for (const branch of BRANCHES) {
-      await setDoc(doc(db, 'branches', branch.id), branch, { merge: true });
-    }
-    console.log('Products and branches seeded successfully into Firestore DB');
+    console.log('Products seeded successfully into Firestore DB');
     return true;
   } catch (error) {
     console.error('Firestore seed error:', error);

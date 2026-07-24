@@ -6,17 +6,6 @@ export type SweetnessType = '0%' | '25%' | '50%' | '100%';
 
 export type MilkType = 'Standard Dairy' | 'Oat Milk' | 'Soy Milk' | 'Almond Milk';
 
-export interface Branch {
-  id: string;
-  name: string;
-  thName: string;
-  location: string;
-  hours: string;
-  distance: string;
-  avgWaitMins: number;
-  phone: string;
-}
-
 export interface MenuItem {
   id: string;
   name: string;

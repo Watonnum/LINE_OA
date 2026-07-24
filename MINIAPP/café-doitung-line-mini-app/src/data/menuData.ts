@@ -1,47 +1,5 @@
-import { Branch, MenuItem } from '../types';
+import { MenuItem } from '../types';
 
-export const BRANCHES: Branch[] = [
-  {
-    id: 'doitung-flagship',
-    name: 'DoiTung Flagship Store',
-    thName: 'สาขาดอยตุง โครงการพัฒนาดอยตุง',
-    location: 'Doi Tung Development Project, Mae Fah Luang, Chiang Rai',
-    hours: '07:30 - 18:00',
-    distance: '0.2 km',
-    avgWaitMins: 10,
-    phone: '053-767-015'
-  },
-  {
-    id: 'central-world',
-    name: 'Central World Branch',
-    thName: 'สาขาเซ็นทรัลเวิลด์ ชั้น 2',
-    location: 'Floor 2 (Beacon Zone), CentralWorld, Bangkok',
-    hours: '09:00 - 21:00',
-    distance: '1.5 km',
-    avgWaitMins: 15,
-    phone: '02-646-1234'
-  },
-  {
-    id: 'chiang-rai-airport',
-    name: 'Mae Fah Luang Airport',
-    thName: 'สาขาท่าอากาศยานแม่ฟ้าหลวง',
-    location: 'Departures Level, Chiang Rai Airport',
-    hours: '06:00 - 20:00',
-    distance: '12 km',
-    avgWaitMins: 8,
-    phone: '053-771-122'
-  },
-  {
-    id: 'silom-complex',
-    name: 'Silom Complex Branch',
-    thName: 'สาขาสีลมคอมเพล็กซ์',
-    location: 'Floor G, Silom Complex, Bangkok',
-    hours: '07:00 - 19:30',
-    distance: '3.8 km',
-    avgWaitMins: 12,
-    phone: '02-231-3311'
-  }
-];
 
 export const MENU_ITEMS: MenuItem[] = [
   {
