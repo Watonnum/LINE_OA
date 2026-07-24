@@ -39,6 +39,11 @@ export default function App() {
   const [isSharePickerAvailable, setIsSharePickerAvailable] = useState<boolean>(false);
   const [lineProfile, setLineProfile] = useState<LineUserProfile | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
+  const [hasMounted, setHasMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Initialize LIFF safely
   useEffect(() => {
@@ -62,6 +67,12 @@ export default function App() {
         setIsLiffInitialized(true);
         const inClient = liff.isInClient();
         setIsInClient(inClient);
+
+        // Clean up stale OAuth query params (?code=...&state=...) from browser URL so refresh works cleanly
+        if (typeof window !== 'undefined' && window.location.search.includes('code=')) {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
 
         // Check if shareTargetPicker API is available
         if (liff.isApiAvailable('shareTargetPicker')) {
@@ -93,6 +104,7 @@ export default function App() {
     };
 
     initLiff();
+
   }, []);
 
   // Fetch real data from Firebase/Services
@@ -327,8 +339,17 @@ export default function App() {
     }
   };
 
+  if (!hasMounted) {
+    return (
+      <div className="min-h-screen bg-[#0A110C] text-stone-200 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[#06C755] border-t-transparent animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0A110C] text-stone-100 font-sans antialiased pb-28">
+
       {/* LINE Mini App Top Header & Branch Selector */}
       <LineHeader
         selectedBranch={selectedBranch}
