@@ -17,9 +17,12 @@ import { FeaturedCarousel } from './components/FeaturedCarousel';
 import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, OrderResponse } from './api/orderService';
-import { syncUserProfile, processReferral } from './services/userService';
-
+import { syncUserProfile, processReferral, fetchUserCoupons } from './services/userService';
 import { fetchProducts, fetchBranches } from './services/productService';
+import { RedeemModal } from './components/RedeemModal';
+import { UserCoupon } from './types';
+
+
 
 export default function App() {
   const [branchesList, setBranchesList] = useState<Branch[]>(BRANCHES);
@@ -121,11 +124,19 @@ export default function App() {
     loadInitialData();
   }, []);
 
-  // Sync user profile to Firestore when user logs in & process referral if arriving via invite link
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
+  const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<UserCoupon | null>(null);
+
+  // Sync user profile & fetch user coupons when user logs in
   useEffect(() => {
     if (lineProfile) {
       syncUserProfile(lineProfile).then((pts) => {
         if (pts !== undefined) setUserBeans(pts);
+      });
+
+      fetchUserCoupons(lineProfile.userId).then((coups) => {
+        if (coups) setUserCoupons(coups);
       });
 
       // Check if friend arrived via referral link (?ref=USER_ID)
@@ -138,6 +149,7 @@ export default function App() {
       }
     }
   }, [lineProfile]);
+
 
 
 
@@ -571,8 +583,26 @@ export default function App() {
         isLoggedIn={isLoggedIn}
         onLogin={handleLineLogin}
         lineUserProfile={lineProfile}
+        userBeans={userBeans}
+        onOpenRedeemModal={() => setIsRedeemModalOpen(true)}
+        appliedCoupon={appliedCoupon}
+        onSelectCoupon={setAppliedCoupon}
+        userCoupons={userCoupons}
         onSubmitOrder={handleSubmitOrder}
         isSubmitting={isSubmitting}
+      />
+
+      {/* Points & Coupons Redemption Modal */}
+      <RedeemModal
+        isOpen={isRedeemModalOpen}
+        onClose={() => setIsRedeemModalOpen(false)}
+        userId={lineProfile?.userId}
+        userBeans={userBeans}
+        onPointsUpdated={setUserBeans}
+        onCouponRedeemed={(newCoupon) => {
+          setUserCoupons((prev) => [newCoupon, ...prev]);
+          setAppliedCoupon(newCoupon);
+        }}
       />
 
       {/* Order Confirmation Modal */}
@@ -584,3 +614,4 @@ export default function App() {
     </div>
   );
 }
+

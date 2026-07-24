@@ -4,7 +4,8 @@ import { MenuItem, Branch } from '../types';
 import { MENU_ITEMS, BRANCHES } from '../data/menuData';
 
 /**
- * Fetch products from Firestore 'products' collection or return default seed data
+ * Fetch products from Firestore 'products' collection.
+ * If empty, automatically seeds Firestore 'products' collection.
  */
 export async function fetchProducts(): Promise<MenuItem[]> {
   if (isFirebaseConfigured() && db) {
@@ -17,6 +18,11 @@ export async function fetchProducts(): Promise<MenuItem[]> {
           items.push({ id: docSnap.id, ...docSnap.data() } as MenuItem);
         });
         return items;
+      } else {
+        // Automatically seed products into Firestore database on first fetch
+        console.log('Seeding products into Firestore database...');
+        await seedProductsToFirestore();
+        return MENU_ITEMS;
       }
     } catch (error) {
       console.error('Firestore fetchProducts error:', error);
@@ -27,7 +33,8 @@ export async function fetchProducts(): Promise<MenuItem[]> {
 }
 
 /**
- * Fetch branches from Firestore 'branches' collection or return default seed data
+ * Fetch branches from Firestore 'branches' collection.
+ * If empty, automatically seeds Firestore 'branches' collection.
  */
 export async function fetchBranches(): Promise<Branch[]> {
   if (isFirebaseConfigured() && db) {
@@ -40,6 +47,9 @@ export async function fetchBranches(): Promise<Branch[]> {
           list.push({ id: docSnap.id, ...docSnap.data() } as Branch);
         });
         return list;
+      } else {
+        await seedProductsToFirestore();
+        return BRANCHES;
       }
     } catch (error) {
       console.error('Firestore fetchBranches error:', error);
@@ -50,7 +60,7 @@ export async function fetchBranches(): Promise<Branch[]> {
 }
 
 /**
- * Seed initial products to Firestore (Utility helper for initial admin setup)
+ * Seed initial products to Firestore database
  */
 export async function seedProductsToFirestore(): Promise<boolean> {
   if (!isFirebaseConfigured() || !db) return false;
@@ -61,6 +71,7 @@ export async function seedProductsToFirestore(): Promise<boolean> {
     for (const branch of BRANCHES) {
       await setDoc(doc(db, 'branches', branch.id), branch, { merge: true });
     }
+    console.log('Products and branches seeded successfully into Firestore DB');
     return true;
   } catch (error) {
     console.error('Firestore seed error:', error);

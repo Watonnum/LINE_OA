@@ -71,3 +71,25 @@ export interface InvitedFriend {
   pointsEarned: number;
   status: 'Active' | 'Joined';
 }
+
+export interface CouponReward {
+  id: string;
+  title: string;
+  thTitle: string;
+  description: string;
+  pointsRequired: number;
+  discountAmount: number;
+  type: 'discount' | 'free_drink';
+  code: string;
+}
+
+export interface UserCoupon {
+  id: string;
+  couponId: string;
+  title: string;
+  thTitle: string;
+  discountAmount: number;
+  code: string;
+  redeemedAt: string;
+  isUsed: boolean;
+}

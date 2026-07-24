@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllOrdersFromStore, saveOrderToStore, getNextOrderId, Order } from '@/lib/ordersStore';
+import { addPointsToUser } from '@/services/userService';
 
 export async function GET() {
   const list = await getAllOrdersFromStore();
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     ).length;
     const baseEstimate = pickupTime?.includes('30') ? 30 : pickupTime?.includes('1 hour') ? 60 : 15;
     const estimatedMinutes = baseEstimate + activeQueue * 2;
+    const finalAmount = Number(totalAmount) || 0;
 
     const newOrder: Order = {
       orderId: newOrderId,
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
         ecoCup: Boolean(item.ecoCup),
         notes: item.notes || ''
       })),
-      totalAmount: Number(totalAmount) || 0,
+      totalAmount: finalAmount,
       pickupTime: pickupTime || 'ASAP (10-15 mins)',
       customerName: String(customerName).trim(),
       customerPhone: String(customerPhone).trim(),
@@ -73,11 +75,23 @@ export async function POST(request: Request) {
 
     await saveOrderToStore(newOrder);
 
+    // Automatically award loyalty points: Every 20 THB spent = 1 Point
+    let pointsEarned = 0;
+    let newTotalPoints = undefined;
+    if (lineUserId && finalAmount > 0) {
+      pointsEarned = Math.floor(finalAmount / 20);
+      if (pointsEarned > 0) {
+        newTotalPoints = await addPointsToUser(String(lineUserId), pointsEarned);
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
         message: 'Order created successfully',
-        data: newOrder
+        data: newOrder,
+        pointsEarned,
+        newTotalPoints
       },
       { status: 201 }
     );
