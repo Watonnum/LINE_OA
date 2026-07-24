@@ -28,9 +28,9 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-[#1E4D2B] text-white shadow-md border-b border-[#2a6239]">
       {/* Brand Header Banner */}
-      <div className="relative overflow-hidden bg-[#1E4D2B] text-white">
+      <div className="relative bg-[#1E4D2B] text-white">
         {/* Background Hero Overlay */}
-        <div className="absolute inset-0 z-0 opacity-25 mix-blend-overlay">
+        <div className="absolute inset-0 z-0 opacity-25 mix-blend-overlay overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80"
             alt="DoiTung Coffee"
@@ -38,6 +38,7 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
             className="w-full h-full object-cover object-center"
           />
         </div>
+
 
         <div className="relative z-10 px-4 py-3 max-w-md mx-auto flex items-center justify-between">
           {/* Logo & Title */}
