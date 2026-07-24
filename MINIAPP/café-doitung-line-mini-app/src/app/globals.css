@@ -13,7 +13,14 @@
   }
 }
 
-/* Float Up Animation for Tap Game (+10, +110 Beans) */
+/* Hide ngrok dev overlay badge from blocking UI navigation */
+#ngrok-skip-header,
+div[class*="ngrok"],
+div[id*="ngrok"] {
+  display: none !important;
+}
+
+/* Float Up Animation */
 @keyframes floatUpFade {
   0% {
     opacity: 1;
