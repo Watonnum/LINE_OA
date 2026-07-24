@@ -480,7 +480,7 @@ export default function App() {
                     onClick={() => setConfirmedOrder(confirmedOrder)}
                     className="text-xs font-bold bg-[#06C755] text-stone-950 px-2.5 py-1 rounded-xl"
                   >
-                    Ticket
+                    ตั๋วรับสินค้า
                   </button>
                 </div>
               )}
@@ -500,8 +500,8 @@ export default function App() {
               {/* Menu Item Cards Grid */}
               <div className="px-4 space-y-2">
                 <div className="flex items-center justify-between text-xs text-stone-400 font-medium px-1 pt-1">
-                  <span>Showing {filteredMenuItems.length} Specialty Items</span>
-                  <span className="text-[#06C755] font-semibold">Chiang Rai Arabica</span>
+                  <span>ทั้งหมด {filteredMenuItems.length} รายการ</span>
+                  <span className="text-[#06C755] font-semibold">กาแฟอาราบิก้าดอยตุง</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -531,9 +531,9 @@ export default function App() {
           {activeTab === 'orders' && (
             <div className="px-4 py-3 space-y-4 animate-in fade-in">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black text-white">Your Orders (ประวัติคำสั่งซื้อ)</h2>
+                <h2 className="text-lg font-black text-white">ประวัติคำสั่งซื้อ</h2>
                 <span className="text-xs text-[#06C755] bg-[#132218] px-2.5 py-1 rounded-full border border-[#1E3A24] font-bold">
-                  {ordersHistory.length} Orders
+                  {ordersHistory.length} ออเดอร์
                 </span>
               </div>
 
@@ -547,19 +547,19 @@ export default function App() {
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">
-                            Order ID
+                            รหัสคำสั่งซื้อ
                           </span>
                           <p className="text-lg font-black font-mono text-[#C5A059]">{ord.orderId}</p>
                         </div>
                         <span className="px-2.5 py-1 bg-emerald-950 text-[#06C755] border border-emerald-700/50 text-[11px] font-bold rounded-full">
-                          {ord.status ? ord.status.replace(/_/g, ' ') : 'Received'}
+                          {ord.status ? ord.status.replace(/_/g, ' ') : 'รับออเดอร์แล้ว'}
                         </span>
                       </div>
 
                       <div className="text-xs text-stone-300 space-y-1">
                         <p className="text-stone-400">
                           <strong>รายการสินค้า:</strong>{' '}
-                          {ord.items ? ord.items.map((i) => `${i.itemName} x${i.quantity}`).join(', ') : 'Specialty Coffee'}
+                          {ord.items ? ord.items.map((i) => `${i.itemName} x${i.quantity}`).join(', ') : 'กาแฟดอยตุง'}
                         </p>
                         <p>
                           <strong>เวลานัดรับ:</strong> {ord.pickupTime}
@@ -573,7 +573,7 @@ export default function App() {
                         onClick={() => setConfirmedOrder(ord)}
                         className="w-full py-2.5 bg-[#06C755] hover:bg-[#05b34c] text-stone-950 font-black text-xs rounded-xl shadow-md transition"
                       >
-                        แสดงตั๋วรับสินค้า (Show Pick-up Ticket)
+                        แสดงตั๋วรับสินค้า
                       </button>
                     </div>
                   ))}
@@ -586,7 +586,7 @@ export default function App() {
                     onClick={() => setActiveTab('home')}
                     className="px-4 py-2 bg-[#06C755] text-stone-950 text-xs font-black rounded-xl"
                   >
-                    สั่งเลยที่ Menu
+                    สั่งเลยที่เมนูสินค้า
                   </button>
                 </div>
               )}

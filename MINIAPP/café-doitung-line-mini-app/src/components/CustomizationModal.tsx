@@ -33,12 +33,11 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
   const [milk, setMilk] = useState<MilkType>('Standard Dairy');
   const [extraShot, setExtraShot] = useState<boolean>(false);
   const [macadamiaDrizzle, setMacadamiaDrizzle] = useState<boolean>(false);
-  const [ecoCup, setEcoCup] = useState<boolean>(true); // Default eco cup discount enabled
+  const [ecoCup, setEcoCup] = useState<boolean>(true);
   const [quantity, setQuantity] = useState<number>(1);
   const [notes, setNotes] = useState<string>('');
 
   useEffect(() => {
-    // Reset defaults when item changes
     if (item) {
       setTemp(
         item.allowTemp && item.allowTemp.includes('Iced')
@@ -57,7 +56,6 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
     }
   }, [item]);
 
-  // Price Calculation Logic
   const isDrink = item.category === 'coffee' || item.category === 'non-coffee';
   let unitPrice = item.price;
   if (isDrink && extraShot) unitPrice += 15;
@@ -97,7 +95,6 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in">
       <div className="w-full max-w-md bg-[#0F1812] text-stone-100 rounded-3xl shadow-2xl overflow-hidden border border-[#1E3A24] max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
-
         
         {/* Header Image */}
         <div className="relative h-44 sm:h-48 w-full bg-stone-900 overflow-hidden flex-shrink-0">
@@ -117,11 +114,8 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           </button>
 
           <div className="absolute bottom-3 left-4 right-4 text-white">
-            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#06C755] text-stone-950 inline-block mb-1">
-              {item.category}
-            </span>
-            <h2 className="text-lg font-bold font-serif leading-tight">{item.name}</h2>
-            <p className="text-xs text-emerald-300">{item.thName}</p>
+            <h2 className="text-lg font-bold leading-tight">{item.thName || item.name}</h2>
+            <p className="text-xs text-stone-300 font-medium">{item.name}</p>
           </div>
         </div>
 
@@ -131,19 +125,19 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           {/* Temperature Options */}
           {isDrink && item.allowTemp && item.allowTemp.length > 0 && (
             <div className="space-y-2">
-              <label className="font-bold text-stone-200 text-xs uppercase tracking-wide flex items-center justify-between">
-                <span>1. Temperature (ความร้อน/เย็น)</span>
-                <span className="text-rose-400 font-semibold">* Required</span>
+              <label className="font-bold text-stone-200 text-xs tracking-wide block">
+                ระดับความร้อน / เย็น
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {item.allowTemp.map((t) => {
                   const isSelected = temp === t;
+                  const thLabel = t === 'Hot' ? 'ร้อน' : t === 'Iced' ? 'เย็น' : 'ปั่น';
                   return (
                     <button
                       key={t}
                       type="button"
                       onClick={() => setTemp(t)}
-                      className={`py-2.5 px-2 rounded-xl border text-xs font-bold transition flex items-center justify-center space-x-1 ${
+                      className={`py-2.5 px-2 rounded-xl border text-xs font-bold transition flex items-center justify-center space-x-1.5 ${
                         isSelected
                           ? 'border-[#06C755] bg-[#06C755] text-stone-950 shadow-md'
                           : 'border-[#1E3A24] bg-[#132218] text-stone-300 hover:border-emerald-600'
@@ -152,7 +146,7 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
                       {t === 'Hot' && <Flame className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
                       {t === 'Iced' && <Snowflake className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />}
                       {t === 'Frappe' && <Sparkles className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />}
-                      <span>{t}</span>
+                      <span>{thLabel}</span>
                     </button>
                   );
                 })}
@@ -163,27 +157,33 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           {/* Sweetness Options */}
           {isDrink && item.allowSweetness && (
             <div className="space-y-2">
-              <label className="font-bold text-stone-200 text-xs uppercase tracking-wide flex items-center justify-between">
-                <span>2. Sweetness Level (ระดับความหวาน)</span>
-                <span className="text-stone-400 text-[11px] font-normal">Chiang Rai Honey Bloom</span>
+              <label className="font-bold text-stone-200 text-xs tracking-wide block">
+                ระดับความหวาน
               </label>
               <div className="grid grid-cols-4 gap-1.5">
-                {(['0%', '25%', '50%', '100%'] as SweetnessType[]).map((sw) => {
-                  const isSelected = sweetness === sw;
+                {(
+                  [
+                    { val: '0%', label: 'ไม่หวาน' },
+                    { val: '25%', label: 'หวานน้อย' },
+                    { val: '50%', label: 'ปกติ' },
+                    { val: '100%', label: 'หวานมาก' }
+                  ] as { val: SweetnessType; label: string }[]
+                ).map((sw) => {
+                  const isSelected = sweetness === sw.val;
                   return (
                     <button
-                      key={sw}
+                      key={sw.val}
                       type="button"
-                      onClick={() => setSweetness(sw)}
+                      onClick={() => setSweetness(sw.val)}
                       className={`py-2 px-1 rounded-xl border text-xs font-medium text-center transition ${
                         isSelected
                           ? 'border-[#06C755] bg-[#06C755] text-stone-950 font-black shadow-md'
                           : 'border-[#1E3A24] bg-[#132218] text-stone-300 hover:border-emerald-600'
                       }`}
                     >
-                      <div>{sw}</div>
+                      <div className="font-bold">{sw.val}</div>
                       <div className={`text-[9px] ${isSelected ? 'text-stone-900 font-bold' : 'text-stone-400'}`}>
-                        {sw === '50%' ? 'Standard' : sw === '0%' ? 'No Sugar' : sw === '25%' ? 'Less' : 'Sweet'}
+                        {sw.label}
                       </div>
                     </button>
                   );
@@ -195,17 +195,16 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           {/* Milk Options */}
           {isDrink && item.allowMilk && (
             <div className="space-y-2">
-              <label className="font-bold text-stone-200 text-xs uppercase tracking-wide flex items-center justify-between">
-                <span>3. Milk Choice (ประเภทนม)</span>
-                <span className="text-stone-400 text-[11px] font-normal">Plant-based choices</span>
+              <label className="font-bold text-stone-200 text-xs tracking-wide block">
+                ประเภทนม
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {(
                   [
-                    { name: 'Standard Dairy', extra: 0, label: 'Standard Dairy' },
-                    { name: 'Oat Milk', extra: 15, label: 'Oat Milk (+฿15)' },
-                    { name: 'Soy Milk', extra: 10, label: 'Soy Milk (+฿10)' },
-                    { name: 'Almond Milk', extra: 15, label: 'Almond Milk (+฿15)' }
+                    { name: 'Standard Dairy', extra: 0, label: 'นมสดปกติ' },
+                    { name: 'Oat Milk', extra: 15, label: 'นมอ๊อต (+15.-)' },
+                    { name: 'Soy Milk', extra: 10, label: 'นมถั่วเหลือง (+10.-)' },
+                    { name: 'Almond Milk', extra: 15, label: 'นมอัลมอนด์ (+15.-)' }
                   ] as { name: MilkType; extra: number; label: string }[]
                 ).map((m) => {
                   const isSelected = milk === m.name;
@@ -220,10 +219,7 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
                           : 'border-[#1E3A24] bg-[#132218] text-stone-200 hover:border-emerald-600'
                       }`}
                     >
-                      <span>{m.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${isSelected ? 'bg-stone-950 text-amber-300 font-bold' : 'bg-stone-800 text-stone-400'}`}>
-                        {m.extra > 0 ? `+฿${m.extra}` : 'Included'}
-                      </span>
+                      <span>{m.label}</span>
                     </button>
                   );
                 })}
@@ -234,27 +230,21 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           {/* Add-on Extras */}
           {isDrink && (
             <div className="space-y-2">
-              <label className="font-bold text-stone-200 text-xs uppercase tracking-wide block">
-                4. Extra Add-ons (ท็อปปิ้งเพิ่มเติม)
+              <label className="font-bold text-stone-200 text-xs tracking-wide block">
+                ท็อปปิ้งเพิ่มเติม
               </label>
               <div className="space-y-2">
                 <label className="p-2.5 rounded-xl bg-[#132218] border border-[#1E3A24] flex items-center justify-between cursor-pointer hover:border-emerald-600 transition">
                   <div className="flex items-center space-x-2">
                     <Coffee className="w-4 h-4 text-[#C5A059]" />
-                    <div>
-                      <div className="font-semibold text-stone-200">Extra DoiTung Espresso Shot</div>
-                      <p className="text-[10px] text-stone-400">ช็อตเอสเปรสโซ่เข้มข้น</p>
-                    </div>
+                    <span className="font-semibold text-stone-200">เพิ่มช็อตเอสเปรสโซ่ดอยตุง (+15.-)</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-amber-400 font-bold text-xs">+฿15</span>
-                    <input
-                      type="checkbox"
-                      checked={extraShot}
-                      onChange={(e) => setExtraShot(e.target.checked)}
-                      className="w-4 h-4 accent-[#06C755] rounded"
-                    />
-                  </div>
+                  <input
+                    type="checkbox"
+                    checked={extraShot}
+                    onChange={(e) => setExtraShot(e.target.checked)}
+                    className="w-4 h-4 accent-[#06C755] rounded"
+                  />
                 </label>
               </div>
             </div>
@@ -262,7 +252,7 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
 
           {/* Eco-Friendly Cup Discount Toggle */}
           {isDrink && (
-            <div className="p-3 rounded-2xl bg-emerald-950/60 border border-emerald-700/50 space-y-1">
+            <div className="p-3 rounded-2xl bg-emerald-950/60 border border-emerald-700/50">
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="flex items-center space-x-2.5">
                   <div className="w-7 h-7 rounded-full bg-[#06C755] text-stone-950 flex items-center justify-center flex-shrink-0 font-bold">
@@ -270,14 +260,8 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
                   </div>
                   <div>
                     <div className="font-bold text-xs text-stone-100 flex items-center space-x-1.5">
-                      <span>Bring My Own Cup</span>
-                      <span className="bg-amber-400 text-stone-950 font-extrabold text-[10px] px-1.5 py-0.2 rounded-full">
-                        SAVE -฿5
-                      </span>
+                      <span>นำแก้วมาเอง (ส่วนลด 5 บาท)</span>
                     </div>
-                    <p className="text-[11px] text-stone-400">
-                      นำแก้วมาเองเมื่อรับหน้าร้าน
-                    </p>
                   </div>
                 </div>
                 <input
@@ -292,8 +276,8 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
 
           {/* Quantity Selector */}
           <div className="pt-2 flex items-center justify-between border-t border-stone-800">
-            <span className="font-bold text-stone-200 text-xs uppercase tracking-wide">
-              Quantity (จำนวน)
+            <span className="font-bold text-stone-200 text-xs">
+              จำนวน
             </span>
             <div className="flex items-center space-x-3 bg-[#132218] p-1 rounded-xl border border-[#1E3A24]">
               <button
@@ -320,19 +304,19 @@ export const CustomizationModal: React.FC<CustomizationModalProps> = ({
           {isLoggedIn ? (
             <button
               onClick={handleAdd}
-              className="w-full py-3.5 px-4 bg-[#06C755] hover:bg-[#05b34c] active:scale-98 text-stone-950 font-black rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm"
+              className="w-full py-3.5 px-4 bg-[#06C755] hover:bg-[#05b34c] active:scale-98 text-stone-950 font-black rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm whitespace-nowrap"
             >
-              <span>Add to Pre-Order (เพิ่มลงในรายการสั่งซื้อ)</span>
+              <span>เพิ่มลงในรายการสั่งซื้อ</span>
               <span>•</span>
               <span className="text-base font-black">฿{finalTotalPrice.toLocaleString()}</span>
             </button>
           ) : (
             <button
               onClick={onLogin}
-              className="w-full py-3.5 px-4 bg-[#06C755] hover:bg-[#05b34c] active:scale-98 text-stone-950 font-black rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm"
+              className="w-full py-3.5 px-4 bg-[#06C755] hover:bg-[#05b34c] active:scale-98 text-stone-950 font-black rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-sm whitespace-nowrap"
             >
               <LogIn className="w-4 h-4 text-stone-950" />
-              <span>Login with LINE เพื่อสั่งซื้อ • ฿{finalTotalPrice.toLocaleString()}</span>
+              <span>เข้าสู่ระบบ LINE เพื่อสั่งซื้อ • ฿{finalTotalPrice.toLocaleString()}</span>
             </button>
           )}
         </div>

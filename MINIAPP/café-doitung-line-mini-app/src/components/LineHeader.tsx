@@ -49,7 +49,7 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5 flex-wrap">
-                <h1 className="text-sm sm:text-base font-bold tracking-tight text-stone-50 font-serif leading-tight truncate">
+                <h1 className="text-sm sm:text-base font-bold tracking-tight text-stone-50 leading-tight truncate">
                   Café DoiTung
                 </h1>
                 <span className="text-[8px] sm:text-[9px] px-1.5 py-0.2 rounded-full bg-[#C5A059] text-stone-950 font-black flex-shrink-0">
@@ -57,7 +57,7 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
                 </span>
               </div>
               <p className="text-[9px] sm:text-[10px] text-emerald-100/90 font-light truncate mt-0.5">
-                Pre-Order & Pickup • สั่งล่วงหน้า
+                สั่งล่วงหน้า & รับหน้าร้าน
               </p>
             </div>
           </div>
@@ -65,9 +65,9 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
           {/* Right Header: User Profile Avatar & Points / Login Button */}
           <div className="relative flex-shrink-0">
             {isAuthChecking ? (
-              <div className="flex items-center space-x-1 px-2 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/50 text-[10px] text-stone-300">
+              <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/50 text-[10px] text-stone-300">
                 <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
-                <span className="hidden xs:inline">Checking...</span>
+                <span>กำลังตรวจสอบ...</span>
               </div>
             ) : isLoggedIn && profile ? (
               <button
@@ -98,12 +98,12 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
                 {isLoggingIn ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Logging in...</span>
+                    <span>กำลังเข้าสู่ระบบ...</span>
                   </>
                 ) : (
                   <>
                     <LogIn className="w-3.5 h-3.5" />
-                    <span>Login LINE</span>
+                    <span>เข้าสู่ระบบ LINE</span>
                   </>
                 )}
               </button>
@@ -135,7 +135,7 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
                   className="w-full px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-rose-300 flex items-center space-x-2 text-xs font-semibold transition"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>ออกจากระบบ (Logout)</span>
+                  <span>ออกจากระบบ</span>
                 </button>
               </div>
             )}

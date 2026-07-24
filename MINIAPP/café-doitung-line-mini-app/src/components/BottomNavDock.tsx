@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Coffee, Users, Coins, ClipboardList } from 'lucide-react';
+import { Coffee, Users, ClipboardList } from 'lucide-react';
 import { MiniAppTab } from '../types';
 
 interface BottomNavDockProps {
@@ -27,23 +27,22 @@ export const BottomNavDock: React.FC<BottomNavDockProps> = ({
   const tabs: { id: MiniAppTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     {
       id: 'home',
-      label: 'Home',
+      label: 'หน้าแรก',
       icon: <Coffee className="w-5 h-5" />,
       badge: cartCount > 0 ? cartCount : undefined
     },
     {
       id: 'friends',
-      label: 'Friends',
+      label: 'ชวนเพื่อน',
       icon: <Users className="w-5 h-5" />
     },
     {
       id: 'orders',
-      label: 'Orders',
+      label: 'ออเดอร์',
       icon: <ClipboardList className="w-5 h-5" />,
       badge: activeOrderCount > 0 ? activeOrderCount : undefined
     }
   ];
-
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 px-3 pb-3 pt-1 pointer-events-none">
@@ -56,7 +55,6 @@ export const BottomNavDock: React.FC<BottomNavDockProps> = ({
                 key={tab.id}
                 onClick={() => handleSelectTab(tab.id)}
                 className={`relative flex-1 py-2 px-1 flex flex-col items-center justify-center rounded-xl transition-all duration-200 ${
-
                   isActive
                     ? 'bg-[#1E3E26] text-[#06C755] font-bold shadow-sm'
                     : 'text-stone-400 hover:text-stone-200'

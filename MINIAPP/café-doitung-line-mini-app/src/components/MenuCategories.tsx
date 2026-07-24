@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-
 import { Coffee, CupSoda, Cookie, ShoppingBag, Leaf, Sparkles } from 'lucide-react';
 import { CategoryType } from '../types';
 
@@ -14,12 +13,12 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({
   activeCategory,
   onSelectCategory
 }) => {
-  const categories: { id: CategoryType; label: string; thLabel: string; icon: React.ReactNode }[] = [
-    { id: 'all', label: 'All Items', thLabel: 'ทั้งหมด', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'coffee', label: 'Coffee', thLabel: 'กาแฟสด', icon: <Coffee className="w-4 h-4" /> },
-    { id: 'non-coffee', label: 'Non-Coffee', thLabel: 'เครื่องดื่ม', icon: <CupSoda className="w-4 h-4" /> },
-    { id: 'bakery', label: 'Bakery', thLabel: 'เบเกอรี่', icon: <Cookie className="w-4 h-4" /> },
-    { id: 'packaged', label: 'Beans & Drip', thLabel: 'เมล็ดกาแฟ', icon: <ShoppingBag className="w-4 h-4" /> }
+  const categories: { id: CategoryType; label: string; icon: React.ReactNode }[] = [
+    { id: 'all', label: 'ทั้งหมด', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'coffee', label: 'กาแฟสด', icon: <Coffee className="w-4 h-4" /> },
+    { id: 'non-coffee', label: 'เครื่องดื่ม', icon: <CupSoda className="w-4 h-4" /> },
+    { id: 'bakery', label: 'เบเกอรี่', icon: <Cookie className="w-4 h-4" /> },
+    { id: 'packaged', label: 'เมล็ดกาแฟ', icon: <ShoppingBag className="w-4 h-4" /> }
   ];
 
   return (
@@ -32,13 +31,13 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({
           </div>
           <div>
             <div className="text-xs font-bold text-white flex items-center space-x-1.5">
-              <span>Eco-Cup Bonus</span>
+              <span>ส่วนลดพิเศษนำแก้วมาเอง</span>
               <span className="text-[10px] bg-amber-400 text-stone-950 px-1.5 py-0.2 rounded-full font-black">
-                -5 THB & +50 Beans
+                ลด 5 บาท & รับแต้มเพิ่ม
               </span>
             </div>
             <p className="text-[11px] text-stone-400">
-              นำแก้วมาเองเมื่อรับหน้าร้าน รับส่วนลดทันที 🌱
+              พกแก้วมาเองเมื่อรับกาแฟที่หน้าร้าน 🌱
             </p>
           </div>
         </div>
@@ -53,21 +52,16 @@ export const MenuCategories: React.FC<MenuCategoriesProps> = ({
               <button
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.id)}
-                className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all shadow-xs ${
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
                   isActive
-                    ? 'bg-[#06C755] text-stone-950 font-extrabold shadow-md'
+                    ? 'bg-[#06C755] text-stone-950 shadow-md'
                     : 'bg-[#132218] text-stone-300 hover:text-white border border-[#1E3A24]'
                 }`}
               >
                 <span className={isActive ? 'text-stone-950' : 'text-[#06C755]'}>
                   {cat.icon}
                 </span>
-                <div className="text-left leading-tight">
-                  <div className="font-bold">{cat.label}</div>
-                  <div className={`text-[9px] ${isActive ? 'text-stone-900 font-semibold' : 'text-stone-400'}`}>
-                    {cat.thLabel}
-                  </div>
-                </div>
+                <span>{cat.label}</span>
               </button>
             );
           })}

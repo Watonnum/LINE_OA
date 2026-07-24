@@ -44,17 +44,17 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelectItem }
           {item.isEcoRecommended && (
             <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded-md text-[8px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-700/50 backdrop-blur-xs flex items-center space-x-1">
               <Leaf className="w-2.5 h-2.5 text-[#06C755] flex-shrink-0" />
-              <span>Eco Cup (-5.-)</span>
+              <span>ลด 5.-</span>
             </span>
           )}
         </div>
 
         {/* Item Info */}
-        <div className="p-3 space-y-1">
+        <div className="p-3 space-y-0.5">
           <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-1 group-hover:text-[#06C755] transition-colors leading-snug">
-            {item.name}
+            {item.thName || item.name}
           </h3>
-          <p className="text-[10px] text-emerald-400 font-medium truncate">{item.thName}</p>
+          <p className="text-[10px] text-emerald-400 font-medium truncate">{item.name}</p>
           <p className="text-[11px] text-stone-400 line-clamp-2 leading-tight">
             {item.description}
           </p>
@@ -64,7 +64,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelectItem }
       {/* Footer Price & Add Button */}
       <div className="p-3 pt-0 flex items-center justify-between border-t border-[#1E3A24] mt-2 gap-1">
         <div className="min-w-0 flex-shrink-0">
-          <span className="text-[9px] text-stone-400 block font-light leading-none">Price</span>
+          <span className="text-[9px] text-stone-400 block font-light leading-none">ราคา</span>
           <span className="text-xs sm:text-base font-black text-amber-400">
             ฿{item.price.toLocaleString()}
           </span>
@@ -78,7 +78,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelectItem }
           className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-[#06C755] text-stone-950 hover:bg-[#05b34c] text-[11px] font-black shadow-xs active:scale-95 transition-all flex-shrink-0"
         >
           <Plus className="w-3 h-3 stroke-[3]" />
-          <span>Pre-Order</span>
+          <span>สั่งซื้อ</span>
         </button>
       </div>
     </div>

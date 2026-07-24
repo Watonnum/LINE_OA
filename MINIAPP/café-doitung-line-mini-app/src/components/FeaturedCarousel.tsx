@@ -17,7 +17,6 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  // Auto slide every 5 seconds
   useEffect(() => {
     if (featuredItems.length === 0) return;
     const interval = setInterval(() => {
@@ -63,12 +62,12 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
       <div className="flex items-center justify-between mb-2 gap-2">
         <div className="flex items-center space-x-1.5 min-w-0">
           <Sparkles className="w-4 h-4 text-[#C5A059] flex-shrink-0" />
-          <h2 className="text-xs sm:text-sm font-bold text-stone-100 font-serif truncate">
-            Chef & Barista Recommendations
+          <h2 className="text-sm font-bold text-stone-100 truncate">
+            เมนูแนะนำโดยบาริสต้า
           </h2>
         </div>
         <span className="text-[10px] bg-emerald-950/80 text-[#06C755] border border-emerald-800/80 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap flex-shrink-0">
-          Featured Specials
+          เมนูพิเศษ
         </span>
       </div>
 
@@ -99,7 +98,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
           <div className="absolute top-3 left-3 flex items-center space-x-2">
             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#1E4D2B] text-amber-300 border border-[#C5A059]/50 shadow-md flex items-center space-x-1">
               <Sparkles className="w-3 h-3 text-amber-300 flex-shrink-0" />
-              <span className="truncate max-w-[120px]">{item.badge || 'DoiTung Special'}</span>
+              <span className="truncate max-w-[140px]">{item.thName || item.name}</span>
             </span>
           </div>
 
@@ -121,7 +120,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
 
           {/* Price Tag Overlay */}
           <div className="absolute bottom-3 right-3 bg-[#1E4D2B]/95 text-white backdrop-blur-md px-3 py-1 rounded-2xl border border-emerald-500/40 shadow-lg flex-shrink-0 z-10">
-            <span className="text-[9px] text-emerald-200 block font-light leading-none">Price</span>
+            <span className="text-[9px] text-emerald-200 block font-light leading-none">ราคา</span>
             <span className="text-sm sm:text-base font-extrabold text-amber-300 whitespace-nowrap">
               ฿{item.price.toLocaleString()}
             </span>
@@ -129,10 +128,10 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
 
           {/* Title on Image */}
           <div className="absolute bottom-3 left-3 right-24 text-white min-w-0 z-10">
-            <h3 className="text-sm sm:text-base font-bold font-serif leading-tight drop-shadow-sm truncate">
-              {item.name}
+            <h3 className="text-sm sm:text-base font-bold leading-tight drop-shadow-sm truncate">
+              {item.thName || item.name}
             </h3>
-            <p className="text-[11px] text-emerald-200 font-medium truncate">{item.thName}</p>
+            <p className="text-[11px] text-emerald-200 font-medium truncate">{item.name}</p>
           </div>
         </div>
 
@@ -164,7 +163,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
               className="py-2 px-3.5 rounded-xl bg-[#1E4D2B] hover:bg-emerald-900 text-white text-xs font-bold shadow-md active:scale-95 transition-all flex items-center space-x-1.5 whitespace-nowrap flex-shrink-0"
             >
               <Plus className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
-              <span>Customize & Order</span>
+              <span>เลือกสั่งซื้อ</span>
             </button>
           </div>
         </div>
