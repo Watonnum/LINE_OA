@@ -96,7 +96,8 @@ export async function saveOrderToStore(newOrder: Order): Promise<Order> {
   if (isFirebaseConfigured() && db) {
     try {
       const orderRef = doc(db, 'orders', newOrder.orderId);
-      await setDoc(orderRef, newOrder);
+      const cleanData = JSON.parse(JSON.stringify(newOrder));
+      await setDoc(orderRef, cleanData);
     } catch (err) {
       console.error('Firestore saveOrder error:', err);
     }
@@ -104,6 +105,7 @@ export async function saveOrderToStore(newOrder: Order): Promise<Order> {
   orders.unshift(newOrder);
   return newOrder;
 }
+
 
 /**
  * Get all orders from Firestore or in-memory
