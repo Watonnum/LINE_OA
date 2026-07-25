@@ -299,6 +299,10 @@ export async function redeemUserCoupon(
 
   const remainingPoints = Math.max(0, currentPoints - reward.pointsRequired);
 
+  // Persist updated points immediately to localStorage, memory, and Firestore
+  await saveUserPoints(effectiveUserId, remainingPoints);
+
+
   const newCoupon: UserCoupon = {
     id: `coup_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     couponId: reward.id,
@@ -312,16 +316,6 @@ export async function redeemUserCoupon(
 
   if (isFirebaseConfigured() && db) {
     try {
-      const userRef = doc(db, 'users', effectiveUserId);
-      await setDoc(
-        userRef,
-        {
-          points: remainingPoints,
-          updatedAt: new Date().toISOString()
-        },
-        { merge: true }
-      );
-
       const couponRef = doc(db, 'coupons', newCoupon.id);
       await setDoc(couponRef, {
         userId: effectiveUserId,
@@ -333,11 +327,11 @@ export async function redeemUserCoupon(
   }
 
   // Always update in-memory and localStorage for instant offline/online availability
-  mockUserPointsMemory[effectiveUserId] = remainingPoints;
   if (!mockCouponsMemory[effectiveUserId]) {
     mockCouponsMemory[effectiveUserId] = [];
   }
   mockCouponsMemory[effectiveUserId].unshift(newCoupon);
+
 
   if (typeof window !== 'undefined') {
     try {

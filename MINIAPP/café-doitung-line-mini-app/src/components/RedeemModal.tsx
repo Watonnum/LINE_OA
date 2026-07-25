@@ -61,6 +61,8 @@ export const RedeemModal: React.FC<RedeemModalProps> = ({
   if (!isOpen) return null;
 
   const handleRedeem = async (reward: CouponReward) => {
+    if (redeemingId !== null) return;
+
     const activeUserId = userId || 'guest_user';
 
     if (userBeans < reward.pointsRequired) {
@@ -85,6 +87,7 @@ export const RedeemModal: React.FC<RedeemModalProps> = ({
       setRedeemingId(null);
     }
   };
+
 
 
   return (

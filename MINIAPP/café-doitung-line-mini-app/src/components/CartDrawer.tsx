@@ -73,7 +73,40 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     0
   );
   const totalEcoDiscount = totalEcoCount * 5;
-  const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+
+  const isFreeDrinkCoupon =
+    appliedCoupon &&
+    (appliedCoupon.couponId === 'c3' ||
+      appliedCoupon.thTitle?.includes('ฟรี') ||
+      appliedCoupon.title?.toLowerCase().includes('free'));
+
+  const coffeeItems = cartItems.filter(
+    (i) => i.menuItem.category === 'coffee' || Boolean(i.customization.temp)
+  );
+
+  let couponDiscount = 0;
+  let freeDrinkWarning = false;
+
+  if (appliedCoupon) {
+    if (isFreeDrinkCoupon) {
+      if (coffeeItems.length > 0) {
+        const maxCoffeePrice = Math.max(
+          ...coffeeItems.map((i) =>
+            i.calculatedPricePerUnit
+              ? i.calculatedPricePerUnit
+              : Math.round(i.totalPrice / i.customization.quantity)
+          )
+        );
+        couponDiscount = Math.min(maxCoffeePrice, appliedCoupon.discountAmount || 105);
+      } else {
+        freeDrinkWarning = true;
+        couponDiscount = 0;
+      }
+    } else {
+      couponDiscount = appliedCoupon.discountAmount || 0;
+    }
+  }
+
   const finalTotal = Math.max(0, subtotal - totalEcoDiscount - couponDiscount);
   const pointsEarned = Math.floor(finalTotal / 20);
 
@@ -85,6 +118,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       setErrorMessage('Your cart is empty.');
       return;
     }
+
+    if (freeDrinkWarning) {
+      setErrorMessage('คูปอง "ฟรี! กาแฟ 1 แก้ว" ต้องมีเมนูกาแฟในตะกร้าอย่างน้อย 1 รายการ');
+      return;
+    }
+
 
     if (!customerName.trim()) {
       setErrorMessage('Please enter customer name for pick-up counter call.');
@@ -270,7 +309,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </option>
                     ))}
                   </select>
+                  {freeDrinkWarning && (
+                    <div className="p-2.5 bg-amber-950/80 border border-amber-800/60 rounded-xl text-[11px] text-amber-200 space-y-1">
+                      <p className="font-bold text-amber-400">
+                        ⚠️ สิทธิ์คูปอง "ฟรี! กาแฟ 1 แก้ว" (ลดสูงสุด 105.-)
+                      </p>
+                      <p className="text-[10px] text-amber-200/90">
+                        ต้องมีเมนูกาแฟในตะกร้าอย่างน้อย 1 รายการเพื่อใช้สิทธิ์ฟรีแก้วนี้
+                      </p>
+                    </div>
+                  )}
                 </div>
+
               ) : (
                 <p className="text-[11px] text-stone-400">
                   คุณยังไม่มีคูปองส่วนลดพร้อมใช้ สามารถกดปุ่ม <strong className="text-[#C5A059]">"แลกคูปองด้วยแต้ม"</strong> เพื่อแลกรับส่วนลดได้เลย!
