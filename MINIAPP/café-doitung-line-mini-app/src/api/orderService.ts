@@ -7,12 +7,16 @@ export interface OrderItemPayload {
   quantity: number;
   ecoCup: boolean;
   notes?: string;
+  image?: string;
 }
 
 export interface OrderPayload {
   lineUserId?: string;
   branch: string;
   items: OrderItemPayload[];
+  subtotalAmount?: number;
+  discountAmount?: number;
+  appliedCouponTitle?: string;
   totalAmount: number;
   pickupTime: string;
   customerName: string;
@@ -25,6 +29,9 @@ export interface OrderResponse {
   lineUserId?: string;
   branch: string;
   items: OrderItemPayload[];
+  subtotalAmount?: number;
+  discountAmount?: number;
+  appliedCouponTitle?: string;
   totalAmount: number;
   pickupTime: string;
   customerName: string;
@@ -34,6 +41,7 @@ export interface OrderResponse {
   status: 'received' | 'preparing' | 'ready_for_pickup' | 'completed';
   estimatedMinutes?: number;
 }
+
 
 const API_BASE = '/api';
 

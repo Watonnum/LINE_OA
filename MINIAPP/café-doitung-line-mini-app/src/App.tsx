@@ -378,6 +378,10 @@ export default function App() {
   }) => {
     setIsSubmitting(true);
     try {
+      const rawSubtotal = cartItems.reduce((acc, i) => acc + i.totalPrice, 0);
+      const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+      const finalTotal = Math.max(0, rawSubtotal - couponDiscount);
+
       const orderPayload = {
         lineUserId: lineProfile?.userId,
         branch: 'Café DoiTung',
@@ -390,14 +394,20 @@ export default function App() {
           price: ci.totalPrice,
           quantity: ci.customization.quantity,
           ecoCup: ci.customization.ecoCup,
-          notes: ci.customization.notes
+          notes: ci.customization.notes,
+          image: ci.menuItem.image
         })),
-        totalAmount: totalCartPrice,
+        subtotalAmount: rawSubtotal,
+        discountAmount: couponDiscount,
+        appliedCouponTitle: appliedCoupon ? appliedCoupon.thTitle : undefined,
+        totalAmount: finalTotal,
         pickupTime: customerData.pickupTime,
         customerName: customerData.customerName,
         customerPhone: customerData.customerPhone,
         note: customerData.note
       };
+
+
 
       const resultOrder = await createOrder(orderPayload);
       setConfirmedOrder(resultOrder);
@@ -572,18 +582,61 @@ export default function App() {
                         </span>
                       </div>
 
-                      <div className="text-xs text-stone-300 space-y-1">
-                        <p className="text-stone-400">
-                          <strong>รายการสินค้า:</strong>{' '}
-                          {ord.items ? ord.items.map((i) => `${i.itemName} x${i.quantity}`).join(', ') : 'กาแฟดอยตุง'}
-                        </p>
-                        <p>
-                          <strong>เวลานัดรับ:</strong> {ord.pickupTime}
-                        </p>
-                        <p className="text-amber-400 font-bold text-sm">
-                          <strong>ยอดรวม:</strong> ฿{ord.totalAmount.toLocaleString()}
-                        </p>
+                      {/* Items with Thumbnails */}
+                      <div className="space-y-2 pt-1 border-t border-[#1E3A24]/60">
+                        {ord.items && ord.items.length > 0 ? (
+                          ord.items.map((item, iIdx) => (
+                            <div key={iIdx} className="flex items-center justify-between gap-2">
+                              <div className="flex items-center space-x-2.5 min-w-0">
+                                <img
+                                  src={
+                                    item.image ||
+                                    'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=150&q=80'
+                                  }
+                                  alt={item.itemName}
+                                  referrerPolicy="no-referrer"
+                                  className="w-10 h-10 rounded-xl object-cover border border-stone-800 flex-shrink-0"
+                                />
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-bold text-stone-100 truncate">
+                                    {item.itemName} <span className="text-[#06C755]">x{item.quantity}</span>
+                                  </h4>
+                                  <p className="text-[10px] text-stone-400 truncate">
+                                    {item.temp} • หวาน {item.sweetness}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="text-xs font-bold text-[#C5A059] flex-shrink-0">
+                                ฿{item.price.toLocaleString()}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-stone-300">กาแฟสดดอยตุง</p>
+                        )}
                       </div>
+
+                      {/* Discount Status Badge */}
+                      <div className="text-xs pt-2 border-t border-[#1E3A24] space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] text-stone-400">สิทธิ์ส่วนลด:</span>
+                          {ord.appliedCouponTitle || (ord.discountAmount && ord.discountAmount > 0) ? (
+                            <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/50">
+                              🎟️ {ord.appliedCouponTitle || 'คูปองส่วนลด'} (-฿{ord.discountAmount || 0})
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-stone-400 bg-stone-900 px-2 py-0.5 rounded-md border border-stone-800">
+                              🏷️ ไม่ได้ใช้ส่วนลด
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex justify-between items-center pt-1 text-sm font-bold">
+                          <span className="text-stone-300">ยอดรวมสุทธิ:</span>
+                          <span className="text-amber-400 font-mono text-base">฿{ord.totalAmount.toLocaleString()}</span>
+                        </div>
+                      </div>
+
 
                       <button
                         onClick={() => setConfirmedOrder(ord)}

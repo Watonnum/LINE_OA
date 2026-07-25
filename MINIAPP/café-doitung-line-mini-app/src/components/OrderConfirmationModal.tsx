@@ -176,38 +176,67 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
             <h4 className="font-bold text-stone-300 text-xs uppercase tracking-wider">
               รายการสินค้าทั้งหมด ({order.items.reduce((acc, i) => acc + i.quantity, 0)} รายการ)
             </h4>
-            <div className="space-y-2 bg-[#142217] p-3 rounded-2xl border border-[#1E3A24]">
+            <div className="space-y-2.5 bg-[#142217] p-3 rounded-2xl border border-[#1E3A24]">
               {order.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex justify-between items-start border-b border-[#1E3A24] pb-2 last:border-0 last:pb-0"
+                  className="flex justify-between items-start border-b border-[#1E3A24] pb-2.5 last:border-0 last:pb-0 gap-2"
                 >
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-stone-100 text-xs">
-                      {item.itemName} <span className="text-[#06C755] font-extrabold">x{item.quantity}</span>
-                    </div>
-                    <div className="text-[10px] text-stone-400 space-x-1.5">
-                      <span>{item.temp}</span>
-                      <span>•</span>
-                      <span>หวาน {item.sweetness}</span>
-                      {item.milk && item.milk !== 'Standard Dairy' && (
-                        <>
-                          <span>•</span>
-                          <span className="text-amber-300 font-medium">{item.milk}</span>
-                        </>
-                      )}
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <img
+                      src={
+                        item.image ||
+                        'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=200&q=80'
+                      }
+                      alt={item.itemName}
+                      referrerPolicy="no-referrer"
+                      className="w-10 h-10 rounded-xl object-cover border border-stone-800 flex-shrink-0"
+                    />
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="font-bold text-stone-100 text-xs truncate">
+                        {item.itemName} <span className="text-[#06C755] font-extrabold">x{item.quantity}</span>
+                      </div>
+                      <div className="text-[10px] text-stone-400 space-x-1 truncate">
+                        <span>{item.temp}</span>
+                        <span>•</span>
+                        <span>หวาน {item.sweetness}</span>
+                        {item.milk && item.milk !== 'Standard Dairy' && (
+                          <>
+                            <span>•</span>
+                            <span className="text-amber-300 font-medium">{item.milk}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <span className="font-extrabold text-[#C5A059]">฿{item.price.toLocaleString()}</span>
+                  <span className="font-extrabold text-[#C5A059] flex-shrink-0 text-xs sm:text-sm">
+                    ฿{item.price.toLocaleString()}
+                  </span>
                 </div>
               ))}
 
-              <div className="pt-2 border-t border-[#1E3A24] flex justify-between items-center font-extrabold text-sm text-stone-50">
-                <span>ยอดรวมทั้งหมด (Total)</span>
-                <span className="text-amber-400 text-base">฿{order.totalAmount.toLocaleString()}</span>
+              {/* Discount Status & Total */}
+              <div className="pt-2 border-t border-[#1E3A24] space-y-1 text-xs">
+                {order.appliedCouponTitle || (order.discountAmount && order.discountAmount > 0) ? (
+                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                    <span>🎟️ ส่วนลดคูปอง ({order.appliedCouponTitle || 'คูปองพิเศษ'})</span>
+                    <span>-฿{order.discountAmount || 0}</span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center text-stone-400 font-normal text-[11px]">
+                    <span>🏷️ สิทธิ์ส่วนลด</span>
+                    <span>ไม่ได้ใช้คูปองส่วนลด</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center font-extrabold text-sm text-stone-50 pt-1 border-t border-[#1E3A24]/60">
+                  <span>ยอดรวมทั้งหมด</span>
+                  <span className="text-amber-400 text-base">฿{order.totalAmount.toLocaleString()}</span>
+                </div>
               </div>
             </div>
           </div>
+
 
           {/* Barista Counter Banner */}
           <div className="p-3 bg-gradient-to-r from-amber-950/40 to-stone-900 border border-amber-800/50 rounded-2xl text-amber-200 text-center space-y-1">
