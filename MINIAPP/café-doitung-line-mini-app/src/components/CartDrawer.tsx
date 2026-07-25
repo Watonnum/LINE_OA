@@ -236,30 +236,34 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </button>
             </div>
 
-            {userCoupons.length > 0 ? (
-              <div className="space-y-1.5">
-                <label className="text-[10px] text-stone-400 block">เลือกคูปองที่ต้องการใช้:</label>
-                <select
-                  value={appliedCoupon?.id || ''}
-                  onChange={(e) => {
-                    const found = userCoupons.find((c) => c.id === e.target.value);
-                    if (onSelectCoupon) onSelectCoupon(found || null);
-                  }}
-                  className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white focus:outline-none focus:border-[#06C755]"
-                >
-                  <option value="">-- ไม่ใช้คูปอง --</option>
-                  {userCoupons.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.thTitle} (-฿{c.discountAmount})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <p className="text-[11px] text-stone-400">
-                คุณยังไม่มีคูปอง สามารถกดปุ่ม <strong className="text-[#C5A059]">"แลกคูปองด้วยแต้ม"</strong> เพื่อแลกรับส่วนลดได้เลย!
-              </p>
-            )}
+            {(() => {
+              const availableCoupons = userCoupons.filter((c) => !c.isUsed);
+              return availableCoupons.length > 0 ? (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-stone-400 block">เลือกคูปองที่ต้องการใช้:</label>
+                  <select
+                    value={appliedCoupon?.id || ''}
+                    onChange={(e) => {
+                      const found = availableCoupons.find((c) => c.id === e.target.value);
+                      if (onSelectCoupon) onSelectCoupon(found || null);
+                    }}
+                    className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white focus:outline-none focus:border-[#06C755]"
+                  >
+                    <option value="">-- ไม่ใช้คูปอง --</option>
+                    {availableCoupons.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.thTitle} (-฿{c.discountAmount})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <p className="text-[11px] text-stone-400">
+                  คุณยังไม่มีคูปองส่วนลดพร้อมใช้ สามารถกดปุ่ม <strong className="text-[#C5A059]">"แลกคูปองด้วยแต้ม"</strong> เพื่อแลกรับส่วนลดได้เลย!
+                </p>
+              );
+            })()}
+
           </div>
 
           {/* Pickup Details & Customer Form */}

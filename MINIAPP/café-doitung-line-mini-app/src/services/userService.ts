@@ -297,3 +297,44 @@ export async function redeemUserCoupon(
   return { success: true, newPoints: remainingPoints, coupon: newCoupon };
 }
 
+/**
+ * Mark a user coupon as used after order completion (Single-use enforcement)
+ */
+export async function markCouponAsUsed(userId: string, couponId: string): Promise<boolean> {
+  const effectiveUserId = userId || 'guest_user';
+  if (!couponId) return false;
+
+  if (isFirebaseConfigured() && db) {
+    try {
+      const couponRef = doc(db, 'coupons', couponId);
+      await updateDoc(couponRef, {
+        isUsed: true,
+        usedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Firestore markCouponAsUsed error:', error);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const key = `cafe_doitung_user_coupons_${effectiveUserId}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const list: UserCoupon[] = JSON.parse(saved);
+        const updated = list.map((c) =>
+          c.id === couponId || c.couponId === couponId
+            ? { ...c, isUsed: true, usedAt: new Date().toISOString() }
+            : c
+        );
+        localStorage.setItem(key, JSON.stringify(updated));
+      }
+    } catch (err) {
+      console.error('Failed to update used coupon in localStorage:', err);
+    }
+  }
+
+  return true;
+}
+
+

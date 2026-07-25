@@ -19,7 +19,8 @@ import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, fetchOrders, OrderResponse } from './api/orderService';
 
-import { syncUserProfile, processReferral, fetchUserCoupons } from './services/userService';
+import { syncUserProfile, processReferral, fetchUserCoupons, markCouponAsUsed } from './services/userService';
+
 import { fetchProducts } from './services/productService';
 import { RedeemModal } from './components/RedeemModal';
 import { UserCoupon } from './types';
@@ -407,10 +408,22 @@ export default function App() {
         }
         return updated;
       });
+
+      // Single-use enforcement: Mark applied coupon as used
+      if (appliedCoupon) {
+        const uid = lineProfile?.userId || 'guest_user';
+        markCouponAsUsed(uid, appliedCoupon.id);
+        setUserCoupons((prev) =>
+          prev.map((c) => (c.id === appliedCoupon.id ? { ...c, isUsed: true } : c))
+        );
+        setAppliedCoupon(null);
+      }
+
       setCartItems([]);
       setIsCartOpen(false);
 
       setUserBeans((prev) => prev + 20); // Earn 20 beans per pre-order
+
     } catch (error: any) {
       console.error('Submission failed:', error);
       throw error;
