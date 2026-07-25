@@ -11,6 +11,7 @@ export interface OrderItem {
   quantity: number;
   ecoCup?: boolean;
   notes?: string;
+  image?: string;
 }
 
 export interface Order {
@@ -18,6 +19,9 @@ export interface Order {
   lineUserId?: string;
   branch: string;
   items: OrderItem[];
+  subtotalAmount?: number;
+  discountAmount?: number;
+  appliedCouponTitle?: string;
   totalAmount: number;
   pickupTime: string;
   customerName: string;
@@ -27,6 +31,7 @@ export interface Order {
   status: 'received' | 'preparing' | 'ready_for_pickup' | 'completed';
   estimatedMinutes?: number;
 }
+
 
 // Global state in-memory store for Next.js API Routes during dev/runtime
 const globalForOrders = globalThis as unknown as {

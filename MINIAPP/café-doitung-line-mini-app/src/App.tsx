@@ -627,25 +627,40 @@ export default function App() {
                       </div>
 
                       {/* Discount Status Badge */}
-                      <div className="text-xs pt-2 border-t border-[#1E3A24] space-y-1">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[11px] text-stone-400">สิทธิ์ส่วนลด:</span>
-                          {ord.appliedCouponTitle || (ord.discountAmount && ord.discountAmount > 0) ? (
-                            <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/50">
-                              🎟️ {ord.appliedCouponTitle || 'คูปองส่วนลด'} (-฿{ord.discountAmount || 0})
-                            </span>
-                          ) : (
-                            <span className="text-[11px] text-stone-400 bg-stone-900 px-2 py-0.5 rounded-md border border-stone-800">
-                              🏷️ ไม่ได้ใช้ส่วนลด
-                            </span>
-                          )}
-                        </div>
+                      {(() => {
+                        const itemsSum = ord.items ? ord.items.reduce((acc, i) => acc + (i.price || 0), 0) : 0;
+                        const calcDiscount =
+                          ord.discountAmount && ord.discountAmount > 0
+                            ? ord.discountAmount
+                            : itemsSum > ord.totalAmount
+                            ? itemsSum - ord.totalAmount
+                            : 0;
 
-                        <div className="flex justify-between items-center pt-1 text-sm font-bold">
-                          <span className="text-stone-300">ยอดรวมสุทธิ:</span>
-                          <span className="text-amber-400 font-mono text-base">฿{ord.totalAmount.toLocaleString()}</span>
-                        </div>
-                      </div>
+                        const hasDiscount = Boolean(ord.appliedCouponTitle || calcDiscount > 0);
+
+                        return (
+                          <div className="text-xs pt-2 border-t border-[#1E3A24] space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[11px] text-stone-400">สิทธิ์ส่วนลด:</span>
+                              {hasDiscount ? (
+                                <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/50">
+                                  🎟️ {ord.appliedCouponTitle || 'คูปองส่วนลด'} (-฿{calcDiscount})
+                                </span>
+                              ) : (
+                                <span className="text-[11px] text-stone-400 bg-stone-900 px-2 py-0.5 rounded-md border border-stone-800">
+                                  🏷️ ไม่ได้ใช้ส่วนลด
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex justify-between items-center pt-1 text-sm font-bold">
+                              <span className="text-stone-300">ยอดรวมสุทธิ:</span>
+                              <span className="text-amber-400 font-mono text-base">฿{ord.totalAmount.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
 
 
                       <button

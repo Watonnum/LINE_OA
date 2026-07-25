@@ -216,26 +216,41 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
               ))}
 
               {/* Discount Status & Total */}
-              <div className="pt-2 border-t border-[#1E3A24] space-y-1 text-xs">
-                {order.appliedCouponTitle || (order.discountAmount && order.discountAmount > 0) ? (
-                  <div className="flex justify-between items-center text-emerald-400 font-semibold">
-                    <span>🎟️ ส่วนลดคูปอง ({order.appliedCouponTitle || 'คูปองพิเศษ'})</span>
-                    <span>-฿{order.discountAmount || 0}</span>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center text-stone-400 font-normal text-[11px]">
-                    <span>🏷️ สิทธิ์ส่วนลด</span>
-                    <span>ไม่ได้ใช้คูปองส่วนลด</span>
-                  </div>
-                )}
+              {(() => {
+                const itemsSum = order.items ? order.items.reduce((acc, i) => acc + (i.price || 0), 0) : 0;
+                const calculatedDiscount =
+                  order.discountAmount && order.discountAmount > 0
+                    ? order.discountAmount
+                    : itemsSum > order.totalAmount
+                    ? itemsSum - order.totalAmount
+                    : 0;
 
-                <div className="flex justify-between items-center font-extrabold text-sm text-stone-50 pt-1 border-t border-[#1E3A24]/60">
-                  <span>ยอดรวมทั้งหมด</span>
-                  <span className="text-amber-400 text-base">฿{order.totalAmount.toLocaleString()}</span>
-                </div>
-              </div>
+                const hasDiscount = Boolean(order.appliedCouponTitle || calculatedDiscount > 0);
+
+                return (
+                  <div className="pt-2 border-t border-[#1E3A24] space-y-1 text-xs">
+                    {hasDiscount ? (
+                      <div className="flex justify-between items-center text-emerald-400 font-semibold">
+                        <span>🎟️ ส่วนลดคูปอง ({order.appliedCouponTitle || 'คูปองส่วนลดพิเศษ'})</span>
+                        <span>-฿{calculatedDiscount}</span>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center text-stone-400 font-normal text-[11px]">
+                        <span>🏷️ สิทธิ์ส่วนลด</span>
+                        <span>ไม่ได้ใช้คูปองส่วนลด</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center font-extrabold text-sm text-stone-50 pt-1 border-t border-[#1E3A24]/60">
+                      <span>ยอดรวมทั้งหมด</span>
+                      <span className="text-amber-400 text-base">฿{order.totalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
+
 
 
           {/* Barista Counter Banner */}

@@ -17,6 +17,9 @@ export async function POST(request: Request) {
       lineUserId,
       branch,
       items,
+      subtotalAmount,
+      discountAmount,
+      appliedCouponTitle,
       totalAmount,
       pickupTime,
       customerName,
@@ -61,8 +64,12 @@ export async function POST(request: Request) {
         price: Number(item.price) || 0,
         quantity: Number(item.quantity) || 1,
         ecoCup: Boolean(item.ecoCup),
-        notes: item.notes || ''
+        notes: item.notes || '',
+        image: item.image || ''
       })),
+      subtotalAmount: Number(subtotalAmount) || undefined,
+      discountAmount: Number(discountAmount) || 0,
+      appliedCouponTitle: appliedCouponTitle ? String(appliedCouponTitle) : undefined,
       totalAmount: finalAmount,
       pickupTime: pickupTime || 'ASAP (10-15 mins)',
       customerName: String(customerName).trim(),
@@ -72,6 +79,7 @@ export async function POST(request: Request) {
       status: 'received',
       estimatedMinutes
     };
+
 
     await saveOrderToStore(newOrder);
 
