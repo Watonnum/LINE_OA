@@ -3,9 +3,11 @@ import { getOrderByIdFromStore } from '@/lib/ordersStore';
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ orderId: string }> }
+  context: any
 ) {
-  const { orderId } = await params;
+  const params = await Promise.resolve(context?.params);
+  const orderId = params?.orderId;
+
   const order = await getOrderByIdFromStore(orderId);
   if (!order) {
     return NextResponse.json(

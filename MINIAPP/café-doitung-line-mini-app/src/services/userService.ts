@@ -253,7 +253,18 @@ export async function fetchUserCoupons(userId: string): Promise<UserCoupon[]> {
       });
 
       const mergedMap = new Map<string, UserCoupon>();
-      [...localCoupons, ...dbCoupons].forEach((c) => mergedMap.set(c.id || c.code, c));
+      localCoupons.forEach((c) => mergedMap.set(c.id || c.code, c));
+      dbCoupons.forEach((c) => {
+        const key = c.id || c.code;
+        const local = mergedMap.get(key);
+        if (local) {
+          const isUsed = Boolean(local.isUsed || c.isUsed);
+          mergedMap.set(key, { ...c, ...local, isUsed });
+        } else {
+          mergedMap.set(key, c);
+        }
+      });
+
       const merged = Array.from(mergedMap.values());
 
       if (typeof window !== 'undefined') {
@@ -311,7 +322,7 @@ export async function redeemUserCoupon(
         { merge: true }
       );
 
-      const couponRef = doc(collection(db, 'coupons'));
+      const couponRef = doc(db, 'coupons', newCoupon.id);
       await setDoc(couponRef, {
         userId: effectiveUserId,
         ...newCoupon
@@ -352,10 +363,14 @@ export async function markCouponAsUsed(userId: string, couponId: string): Promis
   if (isFirebaseConfigured() && db) {
     try {
       const couponRef = doc(db, 'coupons', couponId);
-      await updateDoc(couponRef, {
-        isUsed: true,
-        usedAt: new Date().toISOString()
-      });
+      await setDoc(
+        couponRef,
+        {
+          isUsed: true,
+          usedAt: new Date().toISOString()
+        },
+        { merge: true }
+      );
     } catch (error) {
       console.error('Firestore markCouponAsUsed error:', error);
     }
@@ -381,5 +396,6 @@ export async function markCouponAsUsed(userId: string, couponId: string): Promis
 
   return true;
 }
+
 
 

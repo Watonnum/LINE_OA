@@ -24,7 +24,9 @@ import { syncUserProfile, processReferral, fetchUserCoupons, markCouponAsUsed, a
 
 import { fetchProducts } from './services/productService';
 import { RedeemModal } from './components/RedeemModal';
+import { MyCouponsModal } from './components/MyCouponsModal';
 import { UserCoupon } from './types';
+
 
 
 
@@ -124,8 +126,10 @@ export default function App() {
 
 
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState<boolean>(false);
+  const [isMyCouponsModalOpen, setIsMyCouponsModalOpen] = useState<boolean>(false);
   const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<UserCoupon | null>(null);
+
 
   // Sync user profile & fetch user points/coupons when user logs in or on mount
   useEffect(() => {
@@ -480,7 +484,10 @@ export default function App() {
         isLoggingIn={isLoggingIn}
         onLogin={handleLineLogin}
         onLogout={handleLineLogout}
+        onOpenMyCoupons={() => setIsMyCouponsModalOpen(true)}
+        availableCouponsCount={userCoupons.filter((c) => !c.isUsed).length}
       />
+
 
       {activeView === 'barista' ? (
         <BaristaQueueView />
@@ -758,8 +765,21 @@ export default function App() {
         appliedCoupon={appliedCoupon}
         onSelectCoupon={setAppliedCoupon}
         userCoupons={userCoupons}
+        onOpenMyCoupons={() => setIsMyCouponsModalOpen(true)}
         onSubmitOrder={handleSubmitOrder}
         isSubmitting={isSubmitting}
+      />
+
+      {/* My Coupons Wallet Modal */}
+      <MyCouponsModal
+        isOpen={isMyCouponsModalOpen}
+        onClose={() => setIsMyCouponsModalOpen(false)}
+        userCoupons={userCoupons}
+        onSelectCoupon={(c) => {
+          setAppliedCoupon(c);
+          setIsCartOpen(true);
+        }}
+        onOpenRedeemModal={() => setIsRedeemModalOpen(true)}
       />
 
       {/* Points & Coupons Redemption Modal */}
@@ -774,6 +794,7 @@ export default function App() {
           setAppliedCoupon(newCoupon);
         }}
       />
+
 
       {/* Order Confirmation Modal */}
       <OrderConfirmationModal

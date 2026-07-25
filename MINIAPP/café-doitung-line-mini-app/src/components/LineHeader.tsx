@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Coffee, LogIn, Loader2, LogOut } from 'lucide-react';
+import { Coffee, LogIn, Loader2, LogOut, Ticket } from 'lucide-react';
 import { LineUserProfile } from '../types';
 
 interface LineHeaderProps {
@@ -12,6 +12,8 @@ interface LineHeaderProps {
   isLoggingIn?: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
+  onOpenMyCoupons?: () => void;
+  availableCouponsCount?: number;
 }
 
 export const LineHeader: React.FC<LineHeaderProps> = ({
@@ -21,7 +23,9 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
   isAuthChecking,
   isLoggingIn,
   onLogin,
-  onLogout
+  onLogout,
+  onOpenMyCoupons,
+  availableCouponsCount = 0
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -63,8 +67,24 @@ export const LineHeader: React.FC<LineHeaderProps> = ({
           </div>
 
           {/* Right Header: User Profile Avatar & Points / Login Button */}
-          <div className="relative flex-shrink-0">
+          <div className="relative flex-shrink-0 flex items-center space-x-2">
+            {onOpenMyCoupons && (
+              <button
+                onClick={onOpenMyCoupons}
+                title="กระเป๋าคูปองของฉัน"
+                className="relative p-2 rounded-full bg-emerald-950/80 hover:bg-emerald-900 border border-[#06C755]/50 text-[#06C755] transition"
+              >
+                <Ticket className="w-4 h-4" />
+                {availableCouponsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-amber-500 text-stone-950 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">
+                    {availableCouponsCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             {isAuthChecking ? (
+
               <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/50 text-[10px] text-stone-300">
                 <Loader2 className="w-3 h-3 animate-spin text-emerald-400" />
                 <span>กำลังตรวจสอบ...</span>

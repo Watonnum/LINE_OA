@@ -19,6 +19,7 @@ interface CartDrawerProps {
   appliedCoupon?: UserCoupon | null;
   onSelectCoupon?: (coupon: UserCoupon | null) => void;
   userCoupons?: UserCoupon[];
+  onOpenMyCoupons?: () => void;
   onSubmitOrder: (orderPayload: {
     pickupTime: string;
     customerName: string;
@@ -44,6 +45,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   appliedCoupon,
   onSelectCoupon,
   userCoupons = [],
+  onOpenMyCoupons,
   onSubmitOrder,
   isSubmitting
 }) => {
@@ -224,17 +226,29 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center space-x-1.5">
                 <Tag className="w-4 h-4 text-[#06C755]" />
-                <span>คูปองส่วนลด (Coupon)</span>
+                <span>คูปองส่วนลด</span>
               </span>
-              <button
-                type="button"
-                onClick={onOpenRedeemModal}
-                className="text-[11px] font-bold text-[#C5A059] hover:underline flex items-center space-x-1"
-              >
-                <Gift className="w-3.5 h-3.5" />
-                <span>แลกคูปองด้วยแต้ม ({userBeans} แต้ม)</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                {onOpenMyCoupons && (
+                  <button
+                    type="button"
+                    onClick={onOpenMyCoupons}
+                    className="text-[11px] font-bold text-[#06C755] hover:underline flex items-center space-x-1 bg-[#06C755]/15 px-2 py-0.5 rounded-lg border border-[#06C755]/40"
+                  >
+                    <span>คูปองของฉัน ({userCoupons.filter((c) => !c.isUsed).length})</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onOpenRedeemModal}
+                  className="text-[11px] font-bold text-[#C5A059] hover:underline flex items-center space-x-1"
+                >
+                  <Gift className="w-3.5 h-3.5" />
+                  <span>แลกแต้ม ({userBeans} แต้ม)</span>
+                </button>
+              </div>
             </div>
+
 
             {(() => {
               const availableCoupons = userCoupons.filter((c) => !c.isUsed);

@@ -89,9 +89,14 @@ export async function POST(request: Request) {
     if (lineUserId && finalAmount > 0) {
       pointsEarned = Math.floor(finalAmount / 20);
       if (pointsEarned > 0) {
-        newTotalPoints = await addPointsToUser(String(lineUserId), pointsEarned);
+        try {
+          newTotalPoints = await addPointsToUser(String(lineUserId), pointsEarned);
+        } catch (ptsErr) {
+          console.warn('API route points error (non-fatal):', ptsErr);
+        }
       }
     }
+
 
     return NextResponse.json(
       {

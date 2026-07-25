@@ -58,11 +58,18 @@ export async function createOrder(orderPayload: OrderPayload): Promise<OrderResp
       body: JSON.stringify(orderPayload)
     });
 
-    const result = await response.json();
+    const responseText = await response.text();
+    let result: any = {};
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      throw new Error('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
+    }
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || 'Failed to place order. Please try again.');
+      throw new Error(result.message || 'เกิดข้อผิดพลาดในการสั่งซื้อ กรุณาลองใหม่อีกครั้ง');
     }
+
 
     return result.data;
   } catch (error: any) {
