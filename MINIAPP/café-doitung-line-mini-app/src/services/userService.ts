@@ -309,10 +309,12 @@ export async function redeemUserCoupon(
     title: reward.title,
     thTitle: reward.thTitle,
     discountAmount: reward.discountAmount,
+    minSpend: reward.minSpend,
     code: `${reward.code}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
     redeemedAt: new Date().toISOString(),
     isUsed: false
   };
+
 
   if (isFirebaseConfigured() && db) {
     try {

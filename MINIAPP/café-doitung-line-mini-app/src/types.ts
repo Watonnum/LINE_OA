@@ -68,6 +68,7 @@ export interface CouponReward {
   description: string;
   pointsRequired: number;
   discountAmount: number;
+  minSpend?: number;
   type: 'discount' | 'free_drink';
   code: string;
 }
@@ -78,7 +79,9 @@ export interface UserCoupon {
   title: string;
   thTitle: string;
   discountAmount: number;
+  minSpend?: number;
   code: string;
   redeemedAt: string;
   isUsed: boolean;
 }
+

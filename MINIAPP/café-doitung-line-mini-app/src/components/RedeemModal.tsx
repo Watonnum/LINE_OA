@@ -28,24 +28,27 @@ export const REWARDS_CATALOG: CouponReward[] = [
   {
     id: 'rew_disc_50',
     title: 'THB 50 Discount Voucher',
-    thTitle: 'คูปองส่วนลด 50 บาท',
+    thTitle: 'คูปองส่วนลด 50 บาท (ขั้นต่ำ 150.-)',
     description: 'ใช้เป็นส่วนลดสำหรับการสั่งซื้อครบ 150 บาทขึ้นไป',
     pointsRequired: 80,
     discountAmount: 50,
+    minSpend: 150,
     type: 'discount',
     code: 'DT-DISC50'
   },
   {
-    id: 'rew_free_coffee',
-    title: 'Free Coffee Voucher',
-    thTitle: 'ฟรี! กาแฟดอยตุง 1 แก้ว (มูลค่าสูงสุด 105.-)',
-    description: 'แลกรับฟรี DoiTung Signature Drip Coffee หรือเมนูกาแฟสดร้อน/เย็น 1 แก้ว',
+    id: 'rew_disc_150',
+    title: 'THB 150 Discount Voucher',
+    thTitle: 'ส่วนลด 150 บาท (เมื่อสั่งซื้อเกิน 300.-)',
+    description: 'ใช้เป็นส่วนลด 150 บาทสำหรับการสั่งซื้อสินค้าทุกรายการรวมเกิน 300 บาทขึ้นไป',
     pointsRequired: 120,
-    discountAmount: 105,
-    type: 'free_drink',
-    code: 'DT-FREECOFFEE'
+    discountAmount: 150,
+    minSpend: 300,
+    type: 'discount',
+    code: 'DT-DISC150'
   }
 ];
+
 
 export const RedeemModal: React.FC<RedeemModalProps> = ({
   isOpen,

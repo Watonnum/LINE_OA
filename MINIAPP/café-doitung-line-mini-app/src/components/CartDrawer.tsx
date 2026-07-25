@@ -84,11 +84,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     (i) => i.menuItem.category === 'coffee' || Boolean(i.customization.temp)
   );
 
+  const requiredMinSpend = appliedCoupon
+    ? appliedCoupon.minSpend ||
+      (appliedCoupon.couponId === 'rew_disc_150' || appliedCoupon.thTitle?.includes('300')
+        ? 300
+        : appliedCoupon.couponId === 'rew_disc_50' || appliedCoupon.thTitle?.includes('150')
+        ? 150
+        : 0)
+    : 0;
+
   let couponDiscount = 0;
   let freeDrinkWarning = false;
+  let minSpendWarning = false;
 
   if (appliedCoupon) {
-    if (isFreeDrinkCoupon) {
+    if (requiredMinSpend > 0 && subtotal < requiredMinSpend) {
+      minSpendWarning = true;
+      couponDiscount = 0;
+    } else if (isFreeDrinkCoupon) {
       if (coffeeItems.length > 0) {
         const maxCoffeePrice = Math.max(
           ...coffeeItems.map((i) =>
@@ -119,10 +132,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       return;
     }
 
+    if (minSpendWarning) {
+      setErrorMessage(
+        `คูปองส่วนลดนี้ต้องมียอดสั่งซื้อเกิน ${requiredMinSpend} บาทขึ้นไป (ขาดอีก ${requiredMinSpend - subtotal} บาท)`
+      );
+      return;
+    }
+
     if (freeDrinkWarning) {
       setErrorMessage('คูปอง "ฟรี! กาแฟ 1 แก้ว" ต้องมีเมนูกาแฟในตะกร้าอย่างน้อย 1 รายการ');
       return;
     }
+
 
 
     if (!customerName.trim()) {
@@ -309,6 +330,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </option>
                     ))}
                   </select>
+                  {minSpendWarning && (
+                    <div className="p-2.5 bg-amber-950/80 border border-amber-800/60 rounded-xl text-[11px] text-amber-200 space-y-1">
+                      <p className="font-bold text-amber-400">
+                        ⚠️ ยอดสั่งซื้อยังไม่ถึงเงื่อนไขขั้นต่ำ (ขั้นต่ำ ฿{requiredMinSpend}.-)
+                      </p>
+                      <p className="text-[10px] text-amber-200/90">
+                        คูปองนี้ใช้ได้เมื่อสั่งซื้อสินค้าในตะกร้ารวมเกิน ฿{requiredMinSpend} บาทขึ้นไป (ปัจจุบัน ฿{subtotal} / ขาดอีก ฿{requiredMinSpend - subtotal})
+                      </p>
+                    </div>
+                  )}
                   {freeDrinkWarning && (
                     <div className="p-2.5 bg-amber-950/80 border border-amber-800/60 rounded-xl text-[11px] text-amber-200 space-y-1">
                       <p className="font-bold text-amber-400">
@@ -320,6 +351,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     </div>
                   )}
                 </div>
+
 
               ) : (
                 <p className="text-[11px] text-stone-400">
