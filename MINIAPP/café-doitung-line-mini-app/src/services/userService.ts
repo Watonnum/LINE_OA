@@ -54,49 +54,94 @@ export async function syncUserProfile(profile: LineUserProfile): Promise<number>
 }
 
 /**
- * Fetch customer points balance
+ * Save user points balance to localStorage and Firestore
  */
-export async function getUserPoints(userId: string): Promise<number> {
-  if (!userId) return 0;
+export async function saveUserPoints(userId: string, points: number): Promise<number> {
+  const effectiveUserId = userId || 'guest_user';
+  const cleanPoints = Math.max(0, points);
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(`cafe_doitung_user_points_${effectiveUserId}`, cleanPoints.toString());
+    } catch (err) {
+      console.error('Failed to save points to localStorage:', err);
+    }
+  }
+
+  mockUserPointsMemory[effectiveUserId] = cleanPoints;
 
   if (isFirebaseConfigured() && db) {
     try {
-      const userRef = doc(db, 'users', userId);
+      const userRef = doc(db, 'users', effectiveUserId);
+      await setDoc(
+        userRef,
+        {
+          points: cleanPoints,
+          updatedAt: new Date().toISOString()
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error('Firestore saveUserPoints warning:', error);
+    }
+  }
+
+  return cleanPoints;
+}
+
+/**
+ * Fetch customer points balance
+ */
+export async function getUserPoints(userId: string): Promise<number> {
+  const effectiveUserId = userId || 'guest_user';
+  let localPoints: number | null = null;
+
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(`cafe_doitung_user_points_${effectiveUserId}`);
+      if (saved !== null) {
+        localPoints = parseInt(saved, 10);
+      }
+    } catch (err) {
+      console.error('Failed to read points from localStorage:', err);
+    }
+  }
+
+  let dbPoints: number | null = null;
+  if (isFirebaseConfigured() && db) {
+    try {
+      const userRef = doc(db, 'users', effectiveUserId);
       const userSnap = await getDoc(userRef);
       if (userSnap.exists()) {
-        return userSnap.data().points ?? 0;
+        dbPoints = userSnap.data().points ?? 0;
       }
     } catch (error) {
       console.error('Firestore getUserPoints error:', error);
     }
   }
 
-  return mockUserPointsMemory[userId] ?? 0;
+  const finalPoints = Math.max(
+    localPoints !== null ? localPoints : 0,
+    dbPoints !== null ? dbPoints : 0,
+    mockUserPointsMemory[effectiveUserId] ?? 0
+  );
+
+  return finalPoints;
 }
 
 /**
- * Add loyalty points earned from purchases (Every 20 THB = +1 Point)
+ * Add loyalty points earned from purchases
  */
 export async function addPointsToUser(userId: string, pointsToAdd: number): Promise<number> {
-  if (!userId || pointsToAdd <= 0) return 0;
+  const effectiveUserId = userId || 'guest_user';
+  if (pointsToAdd <= 0) return await getUserPoints(effectiveUserId);
 
-  if (isFirebaseConfigured() && db) {
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        points: increment(pointsToAdd),
-        updatedAt: new Date().toISOString()
-      });
-      const updatedSnap = await getDoc(userRef);
-      return updatedSnap.exists() ? (updatedSnap.data().points ?? 0) : 0;
-    } catch (error) {
-      console.error('Firestore addPointsToUser error:', error);
-    }
-  }
+  const currentPoints = await getUserPoints(effectiveUserId);
+  const newPoints = currentPoints + pointsToAdd;
 
-  mockUserPointsMemory[userId] = (mockUserPointsMemory[userId] || 0) + pointsToAdd;
-  return mockUserPointsMemory[userId];
+  return await saveUserPoints(effectiveUserId, newPoints);
 }
+
 
 /**
  * Fetch list of friends referred by user

@@ -19,7 +19,8 @@ import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, fetchOrders, OrderResponse } from './api/orderService';
 
-import { syncUserProfile, processReferral, fetchUserCoupons, markCouponAsUsed } from './services/userService';
+import { syncUserProfile, processReferral, fetchUserCoupons, markCouponAsUsed, addPointsToUser, getUserPoints, saveUserPoints } from './services/userService';
+
 
 import { fetchProducts } from './services/productService';
 import { RedeemModal } from './components/RedeemModal';
@@ -126,7 +127,7 @@ export default function App() {
   const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<UserCoupon | null>(null);
 
-  // Sync user profile & fetch user coupons when user logs in or on mount
+  // Sync user profile & fetch user points/coupons when user logs in or on mount
   useEffect(() => {
     const activeUid = lineProfile?.userId || 'guest_user';
 
@@ -145,10 +146,15 @@ export default function App() {
       }
     }
 
+    getUserPoints(activeUid).then((pts) => {
+      if (pts !== undefined && pts > 0) setUserBeans(pts);
+    });
+
     fetchUserCoupons(activeUid).then((coups) => {
       if (coups) setUserCoupons(coups);
     });
   }, [lineProfile]);
+
 
 
 
@@ -432,7 +438,11 @@ export default function App() {
       setCartItems([]);
       setIsCartOpen(false);
 
-      setUserBeans((prev) => prev + 20); // Earn 20 beans per pre-order
+      const activeUid = lineProfile?.userId || 'guest_user';
+      const pointsEarned = Math.max(20, Math.floor(finalTotal / 20));
+      const updatedBeans = await addPointsToUser(activeUid, pointsEarned);
+      setUserBeans(updatedBeans);
+
 
     } catch (error: any) {
       console.error('Submission failed:', error);
