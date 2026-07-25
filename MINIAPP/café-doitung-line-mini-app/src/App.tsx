@@ -125,15 +125,13 @@ export default function App() {
   const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
   const [appliedCoupon, setAppliedCoupon] = useState<UserCoupon | null>(null);
 
-  // Sync user profile & fetch user coupons when user logs in
+  // Sync user profile & fetch user coupons when user logs in or on mount
   useEffect(() => {
+    const activeUid = lineProfile?.userId || 'guest_user';
+
     if (lineProfile) {
       syncUserProfile(lineProfile).then((pts) => {
-        if (pts !== undefined) setUserBeans(pts);
-      });
-
-      fetchUserCoupons(lineProfile.userId).then((coups) => {
-        if (coups) setUserCoupons(coups);
+        if (pts !== undefined && pts > 0) setUserBeans(pts);
       });
 
       // Check if friend arrived via referral link (?ref=USER_ID)
@@ -145,7 +143,12 @@ export default function App() {
         }
       }
     }
+
+    fetchUserCoupons(activeUid).then((coups) => {
+      if (coups) setUserCoupons(coups);
+    });
   }, [lineProfile]);
+
 
 
 

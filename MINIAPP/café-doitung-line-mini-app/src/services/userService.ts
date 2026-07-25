@@ -183,40 +183,68 @@ export async function processReferral(referrerUserId: string, friendProfile: Lin
  * Fetch redeemed user coupons
  */
 export async function fetchUserCoupons(userId: string): Promise<UserCoupon[]> {
-  if (!userId) return [];
+  const effectiveUserId = userId || 'guest_user';
+  let localCoupons: UserCoupon[] = [];
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(`cafe_doitung_user_coupons_${effectiveUserId}`);
+      if (saved) {
+        localCoupons = JSON.parse(saved);
+      }
+    } catch (err) {
+      console.error('Failed to parse local coupons:', err);
+    }
+  }
 
   if (isFirebaseConfigured() && db) {
     try {
       const couponsRef = collection(db, 'coupons');
-      const q = query(couponsRef, where('userId', '==', userId));
+      const q = query(couponsRef, where('userId', '==', effectiveUserId));
       const querySnap = await getDocs(q);
 
-      const list: UserCoupon[] = [];
+      const dbCoupons: UserCoupon[] = [];
       querySnap.forEach((docSnap) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as UserCoupon);
+        dbCoupons.push({ id: docSnap.id, ...docSnap.data() } as UserCoupon);
       });
-      return list;
+
+      const mergedMap = new Map<string, UserCoupon>();
+      [...localCoupons, ...dbCoupons].forEach((c) => mergedMap.set(c.id || c.code, c));
+      const merged = Array.from(mergedMap.values());
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`cafe_doitung_user_coupons_${effectiveUserId}`, JSON.stringify(merged));
+      }
+      return merged;
     } catch (error) {
       console.error('Firestore fetchUserCoupons error:', error);
     }
   }
 
-  return mockCouponsMemory[userId] || [];
+  return localCoupons.length > 0 ? localCoupons : (mockCouponsMemory[effectiveUserId] || []);
 }
 
 /**
  * Redeem points for a coupon
  */
-export async function redeemUserCoupon(userId: string, reward: CouponReward): Promise<{ success: boolean; newPoints: number; coupon?: UserCoupon }> {
-  if (!userId || !reward) return { success: false, newPoints: 0 };
+export async function redeemUserCoupon(
+  userId: string,
+  reward: CouponReward,
+  activeUserBeans?: number
+): Promise<{ success: boolean; newPoints: number; coupon?: UserCoupon }> {
+  if (!reward) return { success: false, newPoints: 0 };
+  const effectiveUserId = userId || 'guest_user';
 
-  const currentPoints = await getUserPoints(userId);
+  const dbPoints = await getUserPoints(effectiveUserId);
+  const currentPoints = activeUserBeans !== undefined ? Math.max(activeUserBeans, dbPoints) : dbPoints;
+
   if (currentPoints < reward.pointsRequired) {
     return { success: false, newPoints: currentPoints };
   }
 
+  const remainingPoints = Math.max(0, currentPoints - reward.pointsRequired);
+
   const newCoupon: UserCoupon = {
-    id: `coup_${Date.now()}`,
+    id: `coup_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     couponId: reward.id,
     title: reward.title,
     thTitle: reward.thTitle,
@@ -228,30 +256,44 @@ export async function redeemUserCoupon(userId: string, reward: CouponReward): Pr
 
   if (isFirebaseConfigured() && db) {
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        points: increment(-reward.pointsRequired),
-        updatedAt: new Date().toISOString()
-      });
+      const userRef = doc(db, 'users', effectiveUserId);
+      await setDoc(
+        userRef,
+        {
+          points: remainingPoints,
+          updatedAt: new Date().toISOString()
+        },
+        { merge: true }
+      );
 
-      await addDoc(collection(db, 'coupons'), {
-        userId,
+      const couponRef = doc(collection(db, 'coupons'));
+      await setDoc(couponRef, {
+        userId: effectiveUserId,
         ...newCoupon
       });
-
-      const remainingPoints = currentPoints - reward.pointsRequired;
-      return { success: true, newPoints: remainingPoints, coupon: newCoupon };
     } catch (error) {
-      console.error('Firestore redeemUserCoupon error:', error);
+      console.error('Firestore redeemUserCoupon warning:', error);
     }
   }
 
-  // Fallback in-memory
-  mockUserPointsMemory[userId] = Math.max(0, (mockUserPointsMemory[userId] || 0) - reward.pointsRequired);
-  if (!mockCouponsMemory[userId]) {
-    mockCouponsMemory[userId] = [];
+  // Always update in-memory and localStorage for instant offline/online availability
+  mockUserPointsMemory[effectiveUserId] = remainingPoints;
+  if (!mockCouponsMemory[effectiveUserId]) {
+    mockCouponsMemory[effectiveUserId] = [];
   }
-  mockCouponsMemory[userId].push(newCoupon);
+  mockCouponsMemory[effectiveUserId].unshift(newCoupon);
 
-  return { success: true, newPoints: mockUserPointsMemory[userId], coupon: newCoupon };
+  if (typeof window !== 'undefined') {
+    try {
+      const existingStr = localStorage.getItem(`cafe_doitung_user_coupons_${effectiveUserId}`);
+      const existingList: UserCoupon[] = existingStr ? JSON.parse(existingStr) : [];
+      const updatedList = [newCoupon, ...existingList.filter((c) => c.id !== newCoupon.id)];
+      localStorage.setItem(`cafe_doitung_user_coupons_${effectiveUserId}`, JSON.stringify(updatedList));
+    } catch (err) {
+      console.error('Failed to save redeemed coupon to localStorage:', err);
+    }
+  }
+
+  return { success: true, newPoints: remainingPoints, coupon: newCoupon };
 }
+

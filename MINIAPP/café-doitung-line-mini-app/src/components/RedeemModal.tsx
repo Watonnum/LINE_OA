@@ -61,10 +61,7 @@ export const RedeemModal: React.FC<RedeemModalProps> = ({
   if (!isOpen) return null;
 
   const handleRedeem = async (reward: CouponReward) => {
-    if (!userId) {
-      alert('กรุณาเข้าสู่ระบบผ่าน LINE เพื่อใช้สิทธิ์แลกคูปอง');
-      return;
-    }
+    const activeUserId = userId || 'guest_user';
 
     if (userBeans < reward.pointsRequired) {
       alert(`แต้มไม่พอ คุณมี ${userBeans} แต้ม ต้องการ ${reward.pointsRequired} แต้ม`);
@@ -73,7 +70,7 @@ export const RedeemModal: React.FC<RedeemModalProps> = ({
 
     setRedeemingId(reward.id);
     try {
-      const res = await redeemUserCoupon(userId, reward);
+      const res = await redeemUserCoupon(activeUserId, reward, userBeans);
       if (res.success && res.coupon) {
         onPointsUpdated(res.newPoints);
         if (onCouponRedeemed) onCouponRedeemed(res.coupon);
@@ -88,6 +85,7 @@ export const RedeemModal: React.FC<RedeemModalProps> = ({
       setRedeemingId(null);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
