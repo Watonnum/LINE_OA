@@ -19,7 +19,18 @@ import { BottomNavDock } from './components/BottomNavDock';
 import { InviteFriendsTab } from './components/InviteFriendsTab';
 import { createOrder, fetchOrderById, fetchOrders, OrderResponse } from './api/orderService';
 
-import { syncUserProfile, processReferral, fetchUserCoupons, markCouponAsUsed, addPointsToUser, getUserPoints, saveUserPoints } from './services/userService';
+import {
+  syncUserProfile,
+  processReferral,
+  fetchUserCoupons,
+  markCouponAsUsed,
+  addPointsToUser,
+  getUserPoints,
+  saveUserPoints,
+  subscribeUserPoints,
+  subscribeUserCoupons
+} from './services/userService';
+
 
 
 import { fetchProducts } from './services/productService';
@@ -131,7 +142,7 @@ export default function App() {
   const [appliedCoupon, setAppliedCoupon] = useState<UserCoupon | null>(null);
 
 
-  // Sync user profile & fetch user points/coupons when user logs in or on mount
+  // Sync user profile & subscribe to Realtime DB updates for points & coupons
   useEffect(() => {
     const activeUid = lineProfile?.userId || 'guest_user';
 
@@ -150,14 +161,22 @@ export default function App() {
       }
     }
 
-    getUserPoints(activeUid).then((pts) => {
-      if (pts !== undefined && pts > 0) setUserBeans(pts);
+    // Subscribe to Realtime Points updates directly from Firestore DB
+    const unsubscribePoints = subscribeUserPoints(activeUid, (pts) => {
+      setUserBeans(pts);
     });
 
-    fetchUserCoupons(activeUid).then((coups) => {
-      if (coups) setUserCoupons(coups);
+    // Subscribe to Realtime Coupons updates directly from Firestore DB
+    const unsubscribeCoupons = subscribeUserCoupons(activeUid, (coups) => {
+      setUserCoupons(coups);
     });
+
+    return () => {
+      unsubscribePoints();
+      unsubscribeCoupons();
+    };
   }, [lineProfile]);
+
 
 
 
@@ -299,33 +318,15 @@ export default function App() {
   const [confirmedOrder, setConfirmedOrder] = useState<OrderResponse | null>(null);
   const [ordersHistory, setOrdersHistory] = useState<OrderResponse[]>([]);
 
-  // Load orders history from localStorage and API
+  // Load orders history directly from Database API
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('cafe_doitung_orders');
-        if (saved) {
-          setOrdersHistory(JSON.parse(saved));
-        }
-      } catch (err) {
-        console.error('Failed to parse saved orders:', err);
-      }
-    }
-
     fetchOrders().then((list) => {
       if (list && list.length > 0) {
-        setOrdersHistory((prev) => {
-          const merged = [...prev];
-          for (const item of list) {
-            if (!merged.some((o) => o.orderId === item.orderId)) {
-              merged.push(item);
-            }
-          }
-          return merged;
-        });
+        setOrdersHistory(list);
       }
     });
   }, []);
+
 
 
   const isAnyModalOpen = Boolean(selectedItemForCustom || isCartOpen || isRedeemModalOpen || confirmedOrder);
@@ -421,13 +422,8 @@ export default function App() {
 
       const resultOrder = await createOrder(orderPayload);
       setConfirmedOrder(resultOrder);
-      setOrdersHistory((prev) => {
-        const updated = [resultOrder, ...prev.filter((o) => o.orderId !== resultOrder.orderId)];
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('cafe_doitung_orders', JSON.stringify(updated));
-        }
-        return updated;
-      });
+      setOrdersHistory((prev) => [resultOrder, ...prev.filter((o) => o.orderId !== resultOrder.orderId)]);
+
 
       // Single-use enforcement: Mark applied coupon as used
       if (appliedCoupon) {
