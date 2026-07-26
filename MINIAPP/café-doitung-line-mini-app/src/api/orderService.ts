@@ -12,6 +12,8 @@ export interface OrderItemPayload {
 
 export interface OrderPayload {
   lineUserId?: string;
+  liffAccessToken?: string;
+  notificationToken?: string;
   branch: string;
   items: OrderItemPayload[];
   subtotalAmount?: number;
@@ -40,6 +42,8 @@ export interface OrderResponse {
   createdAt: string;
   status: 'received' | 'preparing' | 'ready_for_pickup' | 'completed';
   estimatedMinutes?: number;
+  serviceMessageSent?: boolean;
+  serviceMessageTemplate?: string;
 }
 
 
@@ -50,11 +54,16 @@ const API_BASE = '/api';
  */
 export async function createOrder(orderPayload: OrderPayload): Promise<OrderResponse> {
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (orderPayload.liffAccessToken) {
+      headers['x-liff-access-token'] = orderPayload.liffAccessToken;
+    }
+
     const response = await fetch(`${API_BASE}/orders`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify(orderPayload)
     });
 
@@ -135,5 +144,31 @@ export async function updateOrderStatus(
   } catch (error) {
     console.error('API Error in updateOrderStatus:', error);
     return null;
+  }
+}
+
+/**
+ * Triggers/Resends LINE Service Message for an order
+ */
+export async function triggerOrderServiceMessage(
+  orderId: string,
+  liffAccessToken?: string
+): Promise<{ success: boolean; message?: string; hasChannelAccessToken?: boolean; details?: any }> {
+  try {
+    const response = await fetch(`${API_BASE}/orders/${orderId}/service-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ liffAccessToken })
+    });
+    const result = await response.json();
+    return result;
+  } catch (error: any) {
+    console.error('API Error in triggerOrderServiceMessage:', error);
+    return {
+      success: false,
+      message: error?.message || 'Network error triggering LINE Service Message'
+    };
   }
 }

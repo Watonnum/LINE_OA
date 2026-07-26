@@ -146,6 +146,17 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
               </div>
             </div>
 
+            {/* LINE Service Message Badge */}
+            <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-[#06C755]/40 flex items-center space-x-2.5 text-[#06C755]">
+              <span className="w-2 h-2 rounded-full bg-[#06C755] animate-pulse flex-shrink-0"></span>
+              <div className="text-[11px] font-bold flex-1 flex items-center justify-between min-w-0">
+                <span className="truncate">LINE Service Message</span>
+                <span className="text-[9px] font-mono bg-[#06C755]/20 px-1.5 py-0.5 rounded text-emerald-300 border border-[#06C755]/30 flex-shrink-0 ml-1">
+                  order_request_s_o_en
+                </span>
+              </div>
+            </div>
+
             {/* Store & Pickup Time Details */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               <div className="bg-[#0A140D]/90 p-2.5 rounded-xl border border-[#1E3A24]">
@@ -156,7 +167,6 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
                 <div className="font-bold text-stone-100 truncate mt-0.5 text-xs">
                   {order.branch || 'Café DoiTung'}
                 </div>
-
               </div>
 
               <div className="bg-[#0A140D]/90 p-2.5 rounded-xl border border-[#1E3A24]">
@@ -250,8 +260,6 @@ export const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
               })()}
             </div>
           </div>
-
-
 
           {/* Barista Counter Banner */}
           <div className="p-3 bg-gradient-to-r from-amber-950/40 to-stone-900 border border-amber-800/50 rounded-2xl text-amber-200 text-center space-y-1">

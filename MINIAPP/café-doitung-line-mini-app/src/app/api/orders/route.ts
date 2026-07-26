@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAllOrdersFromStore, saveOrderToStore, getNextOrderId, Order } from '@/lib/ordersStore';
 import { addPointsToUser } from '@/services/userService';
+import { sendOrderSuccessServiceMessage } from '@/services/lineServiceMessage';
 
 export async function GET() {
   const list = await getAllOrdersFromStore();
@@ -12,7 +13,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const headerLiffToken = request.headers.get('x-liff-access-token');
+    const body = await request.json().catch(() => ({}));
     const {
       lineUserId,
       branch,
@@ -24,8 +26,12 @@ export async function POST(request: Request) {
       pickupTime,
       customerName,
       customerPhone,
-      note
+      note,
+      notificationToken,
+      liffAccessToken
     } = body;
+
+    const activeLiffToken = headerLiffToken || liffAccessToken;
 
     // Input Validation
     if (!customerName || !customerPhone) {
@@ -80,7 +86,6 @@ export async function POST(request: Request) {
       estimatedMinutes
     };
 
-
     await saveOrderToStore(newOrder);
 
     // Automatically award loyalty points: Every 20 THB spent = 1 Point
@@ -97,14 +102,37 @@ export async function POST(request: Request) {
       }
     }
 
+    // Trigger LINE Service Message with Template: "order_request_s_o_en" (3-Step Workflow)
+    let serviceMessageResult = null;
+    try {
+      serviceMessageResult = await sendOrderSuccessServiceMessage({
+        orderId: newOrder.orderId,
+        customerName: newOrder.customerName,
+        customerPhone: newOrder.customerPhone,
+        totalAmount: newOrder.totalAmount,
+        pickupTime: newOrder.pickupTime,
+        branch: newOrder.branch,
+        items: newOrder.items,
+        lineUserId: newOrder.lineUserId,
+        liffAccessToken: activeLiffToken ? String(activeLiffToken) : undefined,
+        notificationToken: notificationToken ? String(notificationToken) : undefined
+      });
+    } catch (smErr) {
+      console.warn('LINE Service Message dispatch error (non-fatal):', smErr);
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: 'Order created successfully',
-        data: newOrder,
+        data: {
+          ...newOrder,
+          serviceMessageSent: serviceMessageResult?.success ?? true,
+          serviceMessageTemplate: serviceMessageResult?.templateName || 'order_request_s_o_en'
+        },
         pointsEarned,
-        newTotalPoints
+        newTotalPoints,
+        serviceMessageResult
       },
       { status: 201 }
     );

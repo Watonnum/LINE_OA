@@ -393,8 +393,18 @@ export default function App() {
       const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
       const finalTotal = Math.max(0, rawSubtotal - couponDiscount);
 
+      let liffAccessToken: string | undefined = undefined;
+      try {
+        if (liff.isLoggedIn()) {
+          liffAccessToken = liff.getAccessToken() || undefined;
+        }
+      } catch (e) {
+        console.warn('liff.getAccessToken error:', e);
+      }
+
       const orderPayload = {
         lineUserId: lineProfile?.userId,
+        liffAccessToken,
         branch: 'Café DoiTung',
 
         items: cartItems.map((ci) => ({
